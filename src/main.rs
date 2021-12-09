@@ -10,6 +10,7 @@ fn main() {
     };
     let espace = Espace {
         rs: 1.0,
+        c: 1.0,
         christoffel: Array3::zeros((4, 4, 4)),
     };
     let test = espace.christoffel.clone();
