@@ -1,13 +1,13 @@
 use ndarray::Array3;
 
 #[derive(Debug, Default, Clone, PartialEq)]
-pub struct Espace {
+pub struct Space {
     pub rs: f64,
     pub c: f64,
     pub christoffel: Array3<f64>,
 }
 
-impl Espace {
+impl Space {
     pub fn update_christoffel(&mut self, position: &[f64; 4]) {
         let r = position[1];
         let theta = position[2];

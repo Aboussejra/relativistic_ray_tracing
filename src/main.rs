@@ -1,8 +1,8 @@
 use ndarray::Array3;
-use relativistic_ray_tracing::{camera::Camera, ray::Ray, space::Espace};
+use relativistic_ray_tracing::{camera::Camera, ray::Ray, space::Space};
 
 fn main() {
-    let mut espace = Espace {
+    let mut espace = Space {
         rs: 1.0,
         c: 1.0,
         christoffel: Array3::zeros((4, 4, 4)),
