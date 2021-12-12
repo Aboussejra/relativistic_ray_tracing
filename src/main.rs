@@ -1,19 +1,18 @@
-use ndarray::{Array, Array3};
-use relativistic_ray_tracing::{camera::Position, space::Espace};
+use ndarray::Array3;
+use relativistic_ray_tracing::{camera::Camera, ray::Ray, space::Espace};
 
 fn main() {
-    println!("Hello, world!");
-    let position = Position {
-        r: 0.0,
-        theta: 0.0,
-        phi: 0.0,
-    };
-    let espace = Espace {
+    let mut espace = Espace {
         rs: 1.0,
         c: 1.0,
         christoffel: Array3::zeros((4, 4, 4)),
     };
-    let test = espace.christoffel.clone();
-    println!("position {:?} and space {:?}", position, espace);
-    println!("{:?}", test[[0, 3, 0]]);
+    let position = [2.; 4];
+    let _camera = Camera::new();
+    let ray = Ray::new().position;
+    println!("ray intialised {:?}", ray);
+    println!("BEFORE : Space {:?}", espace);
+    espace.update_christoffel(&position);
+    println!("AFTER : and space {:?}", espace);
+    println!("{:?}", espace.christoffel[[0, 0, 1]]);
 }

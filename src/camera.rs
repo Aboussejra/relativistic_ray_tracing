@@ -1,22 +1,15 @@
-#[derive(Debug)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Camera {
-    pub position: Position,
-    pub orientation: Orientation,
+    pub position: [f64; 3],    // r, theta, phi
+    pub orientation: [f64; 3], // theta, phi, psi
 }
-#[derive(Debug)]
-pub struct Position {
-    pub r: f64,
-    pub theta: f64,
-    pub phi: f64,
-}
-#[derive(Debug)]
-pub struct Orientation {
-    pub theta: f64,
-    pub phi: f64,
-    pub psi: f64,
-}
-#[derive(Debug)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 pub struct FoV {
     pub x: f64,
     pub y: f64,
+}
+impl Camera {
+    pub fn new() -> Self {
+        Default::default()
+    }
 }
