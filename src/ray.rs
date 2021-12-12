@@ -11,24 +11,26 @@ impl Ray {
         Default::default()
     }
 
-    fn second_derivative(&self, mut s:Space) -> [f64; 4] {
-        s.update_christoffel(&self.position);
-        let mut sd = [0.;4];
-        for i in 0..4{
-            for j in 0..4{
-                for k in 0..4{
-                    sd[i] -= s.christoffel[[i, j, k]] * self.position_derivative[j] * self.position_derivative[k];
+    fn second_derivative(&self, mut space: Space) -> [f64; 4] {
+        space.update_christoffel(&self.position);
+        let mut second_derivative = [0.; 4];
+        for i in 0..4 {
+            for j in 0..4 {
+                for k in 0..4 {
+                    second_derivative[i] -= space.christoffel[[i, j, k]]
+                        * self.position_derivative[j]
+                        * self.position_derivative[k];
                 }
             }
         }
-        sd
+        second_derivative
     }
 
-    fn next_step(&mut self, d_lambda:f64){
+    fn next_step(&mut self, d_lambda: f64) {
         todo!();
     }
 
-    fn trace(&mut self, number_steps:i32){
+    fn trace(&mut self, number_steps: i32) {
         todo!();
     }
 }
