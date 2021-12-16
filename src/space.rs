@@ -1,4 +1,4 @@
-use ndarray::Array3;
+use ndarray::{Array, Array1, Array3};
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Space {
@@ -8,7 +8,7 @@ pub struct Space {
 }
 
 impl Space {
-    pub fn update_christoffel(&mut self, position: &[f64; 4]) {
+    pub fn update_christoffel(&mut self, position: &Array1<f64>) {
         let r = position[1];
         let theta = position[2];
 

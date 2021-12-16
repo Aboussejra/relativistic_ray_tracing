@@ -1,7 +1,8 @@
-#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
+use ndarray::Array1;
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Camera {
-    pub position: [f64; 3],    // r, theta, phi
-    pub orientation: [f64; 3], // theta, phi, psi
+    pub position: Array1<f64>,    // r, theta, phi
+    pub orientation: Array1<f64>, // theta, phi, psi
 }
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 pub struct FoV {
@@ -10,6 +11,9 @@ pub struct FoV {
 }
 impl Camera {
     pub fn new() -> Self {
-        Default::default()
+        Camera {
+            position: Array1::<f64>::zeros(3),
+            orientation: Array1::<f64>::zeros(3),
+        }
     }
 }

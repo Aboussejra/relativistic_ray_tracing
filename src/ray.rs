@@ -1,13 +1,18 @@
+use ndarray::Array1;
+
 use crate::space::Space;
-#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Ray {
-    pub position: [f64; 4],
-    pub position_derivative: [f64; 4], // order of coordinates are t,r,theta,phi
+    pub position: Array1<f64>,
+    pub position_derivative: Array1<f64>, // order of coordinates are t,r,theta,phi
 }
 
 impl Ray {
     pub fn new() -> Self {
-        Default::default()
+        Ray {
+            position: Array1::<f64>::zeros(4),
+            position_derivative: Array1::<f64>::zeros(4),
+        }
     }
 
     fn next_step(&mut self, d_lambda: f64) {
@@ -20,12 +25,12 @@ impl Ray {
 }
 
 fn second_derivative(
-    position: &[f64; 4],
-    position_derivative: &[f64; 4],
+    position: Array1<f64>,
+    position_derivative: Array1<f64>,
     mut space: Space,
-) -> [f64; 4] {
-    space.update_christoffel(position);
-    let mut second_derivative = [0.; 4];
+) -> Array1<f64> {
+    space.update_christoffel(&position);
+    let mut second_derivative = Array1::<f64>::zeros(4);
     for i in 0..4 {
         for j in 0..4 {
             for k in 0..4 {
