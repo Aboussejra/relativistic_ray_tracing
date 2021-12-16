@@ -1,3 +1,5 @@
+use core::num;
+
 use ndarray::Array1;
 
 use crate::space::Space;
@@ -15,8 +17,8 @@ impl Ray {
         }
     }
 
-    fn next_step(mut self, d_lambda: f64, space: &mut Space) {
-        // Runge kutta lol
+    fn next_step(&mut self, d_lambda: f64, space: &mut Space) {
+        // Runge kutta 4
         let initial_position = &self.position;
         let initial_position_derivative = &self.position_derivative;
 
@@ -47,8 +49,19 @@ impl Ray {
             initial_position_derivative + d_lambda / 6. * (k1 + 2. * k2 + 2. * k3 + k4);
     }
 
-    fn trace(&mut self, number_steps: i32) {
-        todo!();
+    pub fn trace(mut self, space: &mut Space, number_steps: i32, d_lambda: f64) {
+        // Performs the number of calls to next_step() specified in argument
+        println!("-----Trace : {}-----", number_steps);
+        for n in 0..number_steps {
+            self.next_step(d_lambda, space);
+            print!("Step {} out of {}", n, number_steps);
+            println!(" : t = {t}   r = {r}   theta = {th}   phi = {p}",
+                t = self.position[0],
+                r = self.position[1],
+                th = self.position[2],
+                p = self.position[3]
+            );
+        }
     }
 }
 
