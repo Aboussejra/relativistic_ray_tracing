@@ -15,8 +15,36 @@ impl Ray {
         }
     }
 
-    fn next_step(&mut self, d_lambda: f64) {
-        todo!();
+    fn next_step(mut self, d_lambda: f64, space: &mut Space) {
+        // Runge kutta lol
+        let initial_position = &self.position;
+        let initial_position_derivative = &self.position_derivative;
+
+        let k1 = &second_derivative(&initial_position, &initial_position_derivative, space);
+        let k2 = &second_derivative(
+            &(initial_position + initial_position_derivative * d_lambda / 2.),
+            &(initial_position_derivative + k1 * d_lambda / 2.),
+            space,
+        );
+        let k3 = &second_derivative(
+            &(initial_position
+                + initial_position_derivative * d_lambda / 2.
+                + k1 * d_lambda.powf(2.) / 4.),
+            &(initial_position_derivative + k2 * d_lambda / 2.),
+            space,
+        );
+        let k4 = second_derivative(
+            &(initial_position
+                + initial_position_derivative * d_lambda
+                + k2 * d_lambda.powf(2.) / 2.),
+            &(initial_position_derivative + k3 * d_lambda),
+            space,
+        );
+        self.position = initial_position
+            + d_lambda * initial_position_derivative
+            + d_lambda.powf(2.) / 6. * (k1 + k2 + k3);
+        self.position_derivative =
+            initial_position_derivative + d_lambda / 6. * (k1 + 2. * k2 + 2. * k3 + k4);
     }
 
     fn trace(&mut self, number_steps: i32) {
@@ -25,9 +53,9 @@ impl Ray {
 }
 
 fn second_derivative(
-    position: Array1<f64>,
-    position_derivative: Array1<f64>,
-    mut space: Space,
+    position: &Array1<f64>,
+    position_derivative: &Array1<f64>,
+    space: &mut Space,
 ) -> Array1<f64> {
     space.update_christoffel(&position);
     let mut second_derivative = Array1::<f64>::zeros(4);
