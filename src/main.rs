@@ -78,6 +78,47 @@ mod unit_tests {
         );
     }
 
+
+    #[test]
+    fn outward_escape() {
+        let C: f64 = 1.;
+        let mut espace = Space {
+            rs: 1.0,
+            c: 1.0,
+            christoffel: Array3::zeros((4, 4, 4)),
+        };
+        let mut position = Array1::<f64>::zeros(4);
+        position[1] = 2.;
+        position[2] = PI / 2.;
+        let mut orientation = Array1::<f64>::zeros(3);
+        orientation[0] = 0.;
+        orientation[1] = 0.;
+        let initial_velocity = C;   // Escapes at light speed : it's a photon
+
+        let step_size = 1.;
+        let number_steps = 100;
+        let mut ray = Ray::new_i(
+            step_size,
+            &position,
+            &orientation,
+            initial_velocity,
+            &espace,
+        );
+
+        ray.trace(&mut espace, number_steps, step_size);
+
+        let error_margin = 1e-3;
+        println!("Test initial position : {:?}", position);
+        println!("Test final position : {:?}", ray.position);
+        assert!(
+            (ray.position[1] > position[1])
+                && ((ray.position[2] - position[2]).abs() <= error_margin)
+                && ((ray.position[3] - position[3]).abs() <= error_margin)
+                && (ray.position_derivative[0].abs() <= error_margin)
+        );
+    }
+
+
     #[test]
     fn test_image_plot() {
         let _result = match std::fs::remove_file("test.png") {
