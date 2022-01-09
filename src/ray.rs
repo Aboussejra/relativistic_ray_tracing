@@ -1,8 +1,11 @@
-use core::num;
+use std::cmp::{self, max};
 
 use ndarray::Array1;
 
 use crate::space::Space;
+
+static C: f64 = 1.;
+
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Ray {
     pub position: Array1<f64>,
@@ -16,7 +19,41 @@ impl Ray {
             position_derivative: Array1::<f64>::zeros(4),
         }
     }
-
+    pub fn new_i(
+        step_size: f64,
+        initial_position: &Array1<f64>,
+        initial_orientation: &Array1<f64>,
+        initial_velocity: f64,
+        space: Space,
+    ) {
+        let position = initial_position.clone();
+        let mut position_derivative = Array1::<f64>::zeros(4);
+        position_derivative[1] = initial_velocity // dr coordinate
+            * step_size
+            * C
+            * initial_orientation[0].cos()
+            * ((1. - space.rs) / initial_position[1]).sqrt();
+        position_derivative[2] = initial_velocity // dtheta coordinate
+            * step_size
+            * C
+            * initial_orientation[0].sin()
+            * initial_orientation[1].cos()
+            / initial_position[1];
+        position_derivative[3] = initial_velocity // dphi coordinate
+            * step_size
+            * C
+            * initial_orientation[0].sin()
+            * initial_orientation[1].sin()
+            / (initial_position[1] * initial_position[2].sin());
+        let a: f64 = 1.;
+        position_derivative[0] = ((step_size.powf(2.))
+            - ((position_derivative[1].powf(2.) / ((1. - space.rs) / initial_position[1]))
+                + (position_derivative[2] * initial_position[1]).powf(2.)
+                + (position_derivative[3] * initial_position[1] * initial_position[1].sin())
+                    .powf(2.))
+                / C.powf(2.))
+            / (1. - (space.rs / initial_position[1])).max(0.).sqrt();
+    }
     fn next_step(&mut self, d_lambda: f64, space: &mut Space) {
         // Runge kutta 4
         let initial_position = &self.position;
@@ -55,7 +92,8 @@ impl Ray {
         for n in 0..number_steps {
             self.next_step(d_lambda, space);
             print!("Step {} out of {}", n, number_steps);
-            println!(" : t = {t}   r = {r}   theta = {th}   phi = {p}",
+            println!(
+                " : t = {t}   r = {r}   theta = {th}   phi = {p}",
                 t = self.position[0],
                 r = self.position[1],
                 th = self.position[2],
