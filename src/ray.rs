@@ -14,6 +14,7 @@ pub struct Ray {
 
 impl Ray {
     pub fn new() -> Self {
+        // Initializes ray with zero arrays
         Ray {
             position: Array1::<f64>::zeros(4),
             position_derivative: Array1::<f64>::zeros(4),
@@ -26,6 +27,16 @@ impl Ray {
         initial_velocity: f64,
         space: &Space,
     ) -> Self {
+        /*  Initializes a ray in given space and given integration step size with :
+        *   - initial position,
+        *   - initial movement direction (spherical coordinates in proper frame)
+                (0,_) points outwards
+                (pi,_) points inwards (towards black hole)
+                (pi/2,0) is tangent, points towards the "north pole"
+                (pi/2,pi/2) is tangent, follows the "latitudes"
+        *   - initial velocity magnitude
+        */
+
         let position = initial_position.clone();
         let mut position_derivative = Array1::<f64>::zeros(4);
         position_derivative[1] = initial_velocity // dr coordinate
@@ -57,8 +68,9 @@ impl Ray {
             position_derivative,
         }
     }
+
     fn next_step(&mut self, d_lambda: f64, space: &mut Space) {
-        // Runge kutta 4
+        // Runge kutta 4 integration method, computes one step
         let initial_position = &self.position;
         let initial_position_derivative = &self.position_derivative;
 
@@ -107,6 +119,7 @@ impl Ray {
 }
 
 fn second_derivative(
+    // Computes second derivative of movement at given position and velocity, in given space
     position: &Array1<f64>,
     position_derivative: &Array1<f64>,
     space: &mut Space,
