@@ -32,7 +32,7 @@ impl Ray {
             * step_size
             * C
             * initial_orientation[0].cos()
-            * ((1. - space.rs) / initial_position[1]).sqrt();
+            * (1. - space.rs / initial_position[1]).sqrt();
         position_derivative[2] = initial_velocity // dtheta coordinate
             * step_size
             * C
@@ -46,13 +46,16 @@ impl Ray {
             * initial_orientation[1].sin()
             / (initial_position[1] * initial_position[2].sin());
         position_derivative[0] = ((step_size.powf(2.))
-            - ((position_derivative[1].powf(2.) / ((1. - space.rs) / initial_position[1]))
+            - ((position_derivative[1].powf(2.) / (1. - space.rs / initial_position[1]))
                 + (position_derivative[2] * initial_position[1]).powf(2.)
                 + (position_derivative[3] * initial_position[1] * initial_position[1].sin())
                     .powf(2.))
                 / C.powf(2.))
             / (1. - (space.rs / initial_position[1])).max(0.).sqrt();
-        Ray{position, position_derivative}
+        Ray {
+            position,
+            position_derivative,
+        }
     }
     fn next_step(&mut self, d_lambda: f64, space: &mut Space) {
         // Runge kutta 4
