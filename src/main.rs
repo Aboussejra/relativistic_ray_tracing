@@ -54,11 +54,11 @@ mod unit_tests {
         position[2] = PI / 2.;
         let mut orientation = Array1::<f64>::zeros(3);
         orientation[0] = PI / 2.;
-        orientation[1] = 0.;
+        orientation[1] = PI / 2.;
         let initial_velocity = (C.powf(2.) * espace.rs / 2. / (position[1] - espace.rs)).sqrt();
 
-        let step_size = 1.;
-        let number_steps = 100;
+        let step_size = 0.01;
+        let number_steps = 1600;
         let mut ray = Ray::new_i(
             step_size,
             &position,
