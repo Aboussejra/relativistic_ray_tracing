@@ -53,20 +53,29 @@ mod unit_tests {
         position[1] = 6.;
         position[2] = PI / 2.;
         let mut orientation = Array1::<f64>::zeros(3);
-        orientation[0] = PI/2.;
+        orientation[0] = PI / 2.;
         orientation[1] = 0.;
-        let initial_velocity = (C.powf(2.) * espace.rs / 2. / (position[1]-espace.rs)).sqrt();
+        let initial_velocity = (C.powf(2.) * espace.rs / 2. / (position[1] - espace.rs)).sqrt();
 
         let step_size = 1.;
         let number_steps = 100;
-        let mut ray = Ray::new_i(step_size, &position, &orientation, initial_velocity, &espace);
-        
+        let mut ray = Ray::new_i(
+            step_size,
+            &position,
+            &orientation,
+            initial_velocity,
+            &espace,
+        );
+
         ray.trace(&mut espace, number_steps, step_size);
 
         let error_margin = 1e-3;
         println!("Test initial position : {:?}", position);
         println!("Test final position : {:?}", ray.position);
-        assert!((ray.position[1] <= position[1] + error_margin) || (ray.position[1] >= position[1] - error_margin) );
+        assert!(
+            (ray.position[1] <= position[1] + error_margin)
+                && (ray.position[1] >= position[1] - error_margin)
+        );
     }
 
     #[test]
