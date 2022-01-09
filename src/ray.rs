@@ -24,8 +24,8 @@ impl Ray {
         initial_position: &Array1<f64>,
         initial_orientation: &Array1<f64>,
         initial_velocity: f64,
-        space: Space,
-    ) {
+        space: &Space,
+    ) -> Self {
         let position = initial_position.clone();
         let mut position_derivative = Array1::<f64>::zeros(4);
         position_derivative[1] = initial_velocity // dr coordinate
@@ -45,7 +45,6 @@ impl Ray {
             * initial_orientation[0].sin()
             * initial_orientation[1].sin()
             / (initial_position[1] * initial_position[2].sin());
-        let a: f64 = 1.;
         position_derivative[0] = ((step_size.powf(2.))
             - ((position_derivative[1].powf(2.) / ((1. - space.rs) / initial_position[1]))
                 + (position_derivative[2] * initial_position[1]).powf(2.)
@@ -53,6 +52,7 @@ impl Ray {
                     .powf(2.))
                 / C.powf(2.))
             / (1. - (space.rs / initial_position[1])).max(0.).sqrt();
+        Ray{position, position_derivative}
     }
     fn next_step(&mut self, d_lambda: f64, space: &mut Space) {
         // Runge kutta 4
@@ -86,7 +86,7 @@ impl Ray {
             initial_position_derivative + d_lambda / 6. * (k1 + 2. * k2 + 2. * k3 + k4);
     }
 
-    pub fn trace(mut self, space: &mut Space, number_steps: i32, d_lambda: f64) {
+    pub fn trace(&mut self, space: &mut Space, number_steps: i32, d_lambda: f64) {
         // Performs the number of calls to next_step() specified in argument
         println!("-----Trace : {}-----", number_steps);
         for n in 0..number_steps {
