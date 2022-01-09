@@ -1,4 +1,4 @@
-use ndarray::{Array, Array1, Array3};
+use ndarray::{Array1, Array3};
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Space {

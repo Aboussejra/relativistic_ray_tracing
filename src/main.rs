@@ -1,12 +1,8 @@
-use std::f64::consts::PI;
-
-use ndarray::{Array1, Array3};
-use relativistic_ray_tracing::{camera::Camera, ray::Ray, space::Space};
+use relativistic_ray_tracing::camera::Camera;
 extern crate image;
 
-use image::{GenericImage, GenericImageView, ImageBuffer, RgbImage};
 fn main() {
-    let camera = Camera::new();
+    let _camera = Camera::new();
     //println!("test camera {:?}", camera);
     // Construct a new RGB ImageBuffer with the specified width and height.
 }
@@ -46,11 +42,11 @@ mod unit_tests {
     }
     #[test]
     fn test_image_plot() {
-        let result = match std::fs::remove_file("test.png") {
+        let _result = match std::fs::remove_file("test.png") {
             Ok(()) => (),
             Err(e) => println!("Could not remove file because of : {:?}", e),
         };
-        let img: RgbImage = ImageBuffer::new(512, 512);
+        let _img: RgbImage = ImageBuffer::new(512, 512);
 
         // Construct a new by repeated calls to the supplied closure.
         let mut img = ImageBuffer::from_fn(512, 512, |x, y| {
@@ -62,10 +58,10 @@ mod unit_tests {
         });
 
         // Obtain the image's width and height.
-        let (width, height) = img.dimensions();
+        let (_width, _height) = img.dimensions();
 
         // Access the pixel at coordinate (100, 100).
-        let pixel = img[(100, 100)];
+        let _pixel = img[(100, 100)];
 
         // Or use the `get_pixel` method from the `GenericImage` trait.
         let pixel = *img.get_pixel(100, 100);

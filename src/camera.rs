@@ -16,4 +16,6 @@ impl Camera {
             orientation: Array1::<f64>::zeros(3),
         }
     }
+
+    pub fn render(&self) {}
 }
