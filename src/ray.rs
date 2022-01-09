@@ -114,6 +114,12 @@ impl Ray {
                 th = self.position[2],
                 p = self.position[3]
             );
+            let true_velocity = (
+                self.position_derivative[1].powf(2.)
+                + (self.position_derivative[2] * self.position[1]).powf(2.)
+                + (self.position_derivative[3] * self.position[1] * self.position[2].sin()).powf(2.)
+            ).sqrt();
+            println!("                     velocity = {v}", v = true_velocity);
         }
     }
 }
