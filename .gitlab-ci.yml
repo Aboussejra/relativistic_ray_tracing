@@ -1,0 +1,34 @@
+image: debian:10.3-slim
+
+before_script:
+- apt-get update && apt-get install -y curl build-essential git
+# -y means yes, you don't have a terminal in CI environment CI = Continuous Integration
+- apt-get install -y pkg-config libssl-dev
+- curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup-init
+# we enforce a https connection, by not specifying protocol, we may accept http protocols during handshake before downloading.
+# here we are sure we will accept only https connections. -sSf means: silent, ShowErrors, fail flags means, that we won't have a document with an error page if curl fails. 
+# Because if we have an error 404, we don't want to write the result of curl in rustup-init, the rest is isual rust setup
+- chmod +x rustup-init
+- ./rustup-init -y --profile=minimal
+- source $HOME/.cargo/env
+- rm rustup-init
+- rustc --version
+- cargo --version
+
+lint:
+  script:
+  - rustup component add clippy
+  - cargo clippy --all-targets --all-features -- -D warnings
+
+formatting:
+  script:
+  - rustup component add rustfmt
+  - cargo fmt -- --check
+
+build:
+  script:
+  - cargo build
+
+test:
+  script:
+  - cargo test

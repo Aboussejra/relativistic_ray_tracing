@@ -2,11 +2,11 @@ use relativistic_ray_tracing::camera::Camera;
 extern crate image;
 
 fn main() {
-    let _camera = Camera::new();
-    //println!("test camera {:?}", camera);
+    let camera = Camera::new();
+    println!("test camera {:?}", camera);
     // Construct a new RGB ImageBuffer with the specified width and height.
 }
-
+#[allow(non_snake_case)]
 #[cfg(test)]
 mod unit_tests {
     use std::f64::consts::PI;
@@ -24,7 +24,7 @@ mod unit_tests {
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
         };
-        
+
         let mut ray = Ray::new();
 
         println!("ray intialised {:?}", ray);
@@ -78,7 +78,6 @@ mod unit_tests {
         );
     }
 
-
     #[test]
     fn outward_escape() {
         let C: f64 = 1.;
@@ -93,7 +92,7 @@ mod unit_tests {
         let mut orientation = Array1::<f64>::zeros(3);
         orientation[0] = 0.;
         orientation[1] = 0.;
-        let initial_velocity = C;   // Escapes at light speed : it's a photon
+        let initial_velocity = C; // Escapes at light speed : it's a photon
 
         let step_size = 1.;
         let number_steps = 100;
@@ -118,7 +117,6 @@ mod unit_tests {
         );
     }
 
-
     #[test]
     fn test_image_plot() {
         let _result = match std::fs::remove_file("test.png") {
@@ -128,7 +126,7 @@ mod unit_tests {
         let _img: RgbImage = ImageBuffer::new(512, 512);
 
         // Construct a new by repeated calls to the supplied closure.
-        let mut img = ImageBuffer::from_fn(512, 512, |x, y| {
+        let mut img = ImageBuffer::from_fn(512, 512, |x, _y| {
             if x % 2 == 0 {
                 image::Luma([0u8])
             } else {

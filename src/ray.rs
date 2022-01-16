@@ -1,5 +1,3 @@
-use std::cmp::{self, max};
-
 use ndarray::Array1;
 
 use crate::space::Space;
@@ -74,7 +72,7 @@ impl Ray {
         let initial_position = &self.position;
         let initial_position_derivative = &self.position_derivative;
 
-        let k1 = &second_derivative(&initial_position, &initial_position_derivative, space);
+        let k1 = &second_derivative(initial_position, initial_position_derivative, space);
         let k2 = &second_derivative(
             &(initial_position + initial_position_derivative * d_lambda / 2.),
             &(initial_position_derivative + k1 * d_lambda / 2.),
@@ -114,11 +112,11 @@ impl Ray {
                 th = self.position[2],
                 p = self.position[3]
             );
-            let true_velocity = (
-                self.position_derivative[1].powf(2.)
+            let true_velocity = (self.position_derivative[1].powf(2.)
                 + (self.position_derivative[2] * self.position[1]).powf(2.)
-                + (self.position_derivative[3] * self.position[1] * self.position[2].sin()).powf(2.)
-            ).sqrt();
+                + (self.position_derivative[3] * self.position[1] * self.position[2].sin())
+                    .powf(2.))
+            .sqrt();
             println!("                     velocity = {v}", v = true_velocity);
         }
     }
@@ -130,7 +128,7 @@ fn second_derivative(
     position_derivative: &Array1<f64>,
     space: &mut Space,
 ) -> Array1<f64> {
-    space.update_christoffel(&position);
+    space.update_christoffel(position);
     let mut second_derivative = Array1::<f64>::zeros(4);
     for i in 0..4 {
         for j in 0..4 {
