@@ -1,5 +1,4 @@
 use relativistic_ray_tracing::camera::Camera;
-extern crate image;
 
 fn main() {
     let camera = Camera::new();
