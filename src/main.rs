@@ -42,31 +42,25 @@ mod unit_tests {
 
     #[test]
     fn circular_orbit() {
-        let C: f64 = 1.;
-        let mut espace = Space {
+        let mut space = Space {
             rs: 1.0,
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
         };
+        let C: f64 = space.c;
         let mut position = Array1::<f64>::zeros(4);
         position[1] = 6.;
         position[2] = PI / 2.;
         let mut orientation = Array1::<f64>::zeros(3);
         orientation[0] = PI / 2.;
         orientation[1] = PI / 2.;
-        let initial_velocity = (C.powf(2.) * espace.rs / 2. / (position[1] - espace.rs)).sqrt();
+        let initial_velocity = (C.powf(2.) * space.rs / 2. / (position[1] - space.rs)).sqrt();
 
         let step_size = 0.01;
         let number_steps = 1600;
-        let mut ray = Ray::new_i(
-            step_size,
-            &position,
-            &orientation,
-            initial_velocity,
-            &espace,
-        );
+        let mut ray = Ray::new_i(step_size, &position, &orientation, initial_velocity, &space);
 
-        ray.trace(&mut espace, number_steps, step_size);
+        ray.trace(&mut space, number_steps, step_size);
 
         let error_margin = 1e-3;
         println!("Test initial position : {:?}", position);
@@ -79,8 +73,7 @@ mod unit_tests {
 
     #[test]
     fn outward_escape() {
-        let C: f64 = 1.;
-        let mut espace = Space {
+        let mut space = Space {
             rs: 1.0,
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
@@ -91,19 +84,13 @@ mod unit_tests {
         let mut orientation = Array1::<f64>::zeros(3);
         orientation[0] = 0.;
         orientation[1] = 0.;
-        let initial_velocity = C; // Escapes at light speed : it's a photon
+        let initial_velocity = space.c; // Escapes at light speed : it's a photon
 
         let step_size = 1.;
         let number_steps = 100;
-        let mut ray = Ray::new_i(
-            step_size,
-            &position,
-            &orientation,
-            initial_velocity,
-            &espace,
-        );
+        let mut ray = Ray::new_i(step_size, &position, &orientation, initial_velocity, &space);
 
-        ray.trace(&mut espace, number_steps, step_size);
+        ray.trace(&mut space, number_steps, step_size);
 
         let error_margin = 1e-3;
         println!("Test initial position : {:?}", position);

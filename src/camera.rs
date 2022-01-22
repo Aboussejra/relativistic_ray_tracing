@@ -1,6 +1,6 @@
 use crate::{ray::Ray, space::Space};
 use ang::atan2;
-use ndarray::{Array1, Array3};
+use ndarray::Array1;
 use num_integer::Roots;
 use std::f64::consts::PI;
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -49,8 +49,7 @@ impl Camera {
                         let mut ray_orientation = Array1::<f64>::zeros(2);
                         ray_orientation[0] = theta;
                         ray_orientation[1] = phi;
-                        let C = 1.;
-                        let initial_velocity = C;
+                        let initial_velocity = space.c;
 
                         let ray = Ray::new_i(
                             step_size,
