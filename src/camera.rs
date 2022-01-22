@@ -1,5 +1,6 @@
 use crate::{ray::Ray, space::Space};
 use ang::atan2;
+use image::{ImageBuffer, RgbImage};
 use ndarray::Array1;
 use num_integer::Roots;
 use std::f64::consts::PI;
@@ -7,7 +8,7 @@ use std::f64::consts::PI;
 pub struct Camera {
     pub position: Array1<f64>,    // r, theta, phi
     pub orientation: Array1<f64>, // theta, phi, psi
-    pub im_size: [usize; 2],
+    pub im_size: [u32; 2],
     pub fov: [f64; 2],
 }
 
@@ -28,6 +29,7 @@ impl Camera {
         let size_x_float = size_x as f64;
         let size_y = self.im_size[1];
         let size_y_float = size_y as f64;
+        let img: RgbImage = ImageBuffer::new(self.im_size[0], self.im_size[1]);
         for i in 0..size_x {
             for j in 0..size_y {
                 for ray_x in 0..n_rays {
@@ -64,5 +66,7 @@ impl Camera {
                 }
             }
         }
+        let title = format!("render_dims_{:?}.png", img.dimensions());
+        img.save(title).expect("Problem on saving image");
     }
 }
