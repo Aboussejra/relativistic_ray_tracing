@@ -21,7 +21,7 @@ impl Camera {
         }
     }
 
-    pub fn render(&self, n_rays: usize, step_size: f64, space: &Space) {
+    pub fn render(&self, n_rays: usize, number_steps: i32, step_size: f64, space: &mut Space) {
         let n_rays = n_rays.sqrt();
         let n_rays_float = n_rays as f64;
         let size_x = self.im_size[0];
@@ -51,13 +51,15 @@ impl Camera {
                         ray_orientation[1] = phi;
                         let initial_velocity = space.c;
 
-                        let ray = Ray::new_i(
+                        let mut ray = Ray::new_i(
                             step_size,
                             &self.position,
                             &ray_orientation,
                             initial_velocity,
                             space,
                         );
+                        let d_lambda = step_size;
+                        ray.trace(space, number_steps, d_lambda);
                     }
                 }
             }

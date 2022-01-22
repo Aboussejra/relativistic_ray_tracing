@@ -1,6 +1,6 @@
 use ndarray::Array1;
 
-use crate::space::Space;
+use crate::{obstacle::Obstacle, space::Space};
 
 static C: f64 = 1.;
 
@@ -102,7 +102,9 @@ impl Ray {
     pub fn trace(&mut self, space: &mut Space, number_steps: i32, d_lambda: f64) {
         // Performs the number of calls to next_step() specified in argument
         println!("-----Trace : {}-----", number_steps);
+        let blackhole = Obstacle::BlackHole { r: space.rs };
         for n in 0..number_steps {
+            let old_position = &self.position.clone();
             self.next_step(d_lambda, space);
             print!("Step {} out of {}", n, number_steps);
             println!(
@@ -118,6 +120,10 @@ impl Ray {
                     .powf(2.))
             .sqrt();
             println!("                     velocity = {v}", v = true_velocity);
+            let new_position = &self.position.clone();
+            if blackhole.collision(&old_position, new_position) {
+                break;
+            }
         }
     }
 }
