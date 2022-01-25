@@ -20,8 +20,8 @@ impl Ray {
     }
     pub fn new_i(
         step_size: f64,
-        initial_position: &Array1<f64>,
-        initial_orientation: &Array1<f64>,
+        initial_position: &Array1<f64>,     // Size 4 (t, r, theta, phi)
+        initial_orientation: &Array1<f64>,  // Size 2 (theta, phi)
         initial_velocity: f64,
         space: &Space,
     ) -> Self {
@@ -99,27 +99,29 @@ impl Ray {
             initial_position_derivative + d_lambda / 6. * (k1 + 2. * k2 + 2. * k3 + k4);
     }
 
-    pub fn trace(&mut self, space: &mut Space, number_steps: i32, d_lambda: f64) {
+    pub fn trace(&mut self, space: &mut Space, number_steps: i32, d_lambda: f64, verbose: bool) {
         // Performs the number of calls to next_step() specified in argument
         println!("-----Trace : {}-----", number_steps);
         let blackhole = Obstacle::BlackHole { r: space.rs };
         for n in 0..number_steps {
             let old_position = &self.position.clone();
             self.next_step(d_lambda, space);
-            print!("Step {} out of {}", n, number_steps);
-            println!(
-                " : t = {t}   r = {r}   theta = {th}   phi = {p}",
-                t = self.position[0],
-                r = self.position[1],
-                th = self.position[2],
-                p = self.position[3]
-            );
-            let true_velocity = (self.position_derivative[1].powf(2.)
-                + (self.position_derivative[2] * self.position[1]).powf(2.)
-                + (self.position_derivative[3] * self.position[1] * self.position[2].sin())
+            if verbose {
+                print!("Step {} out of {}", n, number_steps);
+                println!(
+                    " : t = {t}   r = {r}   theta = {th}   phi = {p}",
+                    t = self.position[0],
+                    r = self.position[1],
+                    th = self.position[2],
+                    p = self.position[3]
+                );
+                let true_velocity = (self.position_derivative[1].powf(2.)
+                    + (self.position_derivative[2] * self.position[1]).powf(2.)
+                    + (self.position_derivative[3] * self.position[1] * self.position[2].sin())
                     .powf(2.))
-            .sqrt();
-            println!("                     velocity = {v}", v = true_velocity);
+                    .sqrt();
+                println!("                     velocity = {v}", v = true_velocity);
+            }
             let new_position = &self.position.clone();
             if blackhole.collision(&old_position, new_position) {
                 break;

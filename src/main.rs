@@ -37,7 +37,7 @@ mod unit_tests {
         ray.position[1] = 6.;
         ray.position[2] = PI / 2.;
         ray.position_derivative[0] = 1.;
-        ray.trace(&mut espace, 10, 1.);
+        ray.trace(&mut espace, 10, 1., false);
     }
 
     #[test]
@@ -60,7 +60,7 @@ mod unit_tests {
         let number_steps = 1600;
         let mut ray = Ray::new_i(step_size, &position, &orientation, initial_velocity, &space);
 
-        ray.trace(&mut space, number_steps, step_size);
+        ray.trace(&mut space, number_steps, step_size, true);
 
         let error_margin = 1e-3;
         println!("Test initial position : {:?}", position);
@@ -90,7 +90,7 @@ mod unit_tests {
         let number_steps = 100;
         let mut ray = Ray::new_i(step_size, &position, &orientation, initial_velocity, &space);
 
-        ray.trace(&mut space, number_steps, step_size);
+        ray.trace(&mut space, number_steps, step_size, true);
 
         let error_margin = 1e-3;
         println!("Test initial position : {:?}", position);
