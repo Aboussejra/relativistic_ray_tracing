@@ -13,6 +13,8 @@ mod unit_tests {
     use image::{ImageBuffer, RgbImage};
     use ndarray::{Array1, Array3};
     use relativistic_ray_tracing::{ray::Ray, space::Space};
+    use relativistic_ray_tracing::camera::Camera;
+
     #[test]
     fn ray_tracing() {
         let position = Array1::<f64>::ones(4).mapv(|elem| elem * 2.);
@@ -142,5 +144,32 @@ mod unit_tests {
         }
         // Save the image as “fractal.png”, the format is deduced from the path
         imgbuf.save("test.png").expect("Problem on saving image");
+    }
+
+    #[test]
+    fn test_render(){
+        let mut space = Space{
+            rs: 1.0,
+            c: 1.0,
+            christoffel: Array3::zeros((4, 4, 4)),
+        };
+
+        let mut cam_position = Array1::<f64>::zeros(3);
+        cam_position[0] = 4.;
+        cam_position[1] = PI / 2.;
+        let mut cam_orientation = Array1::<f64>::zeros(3);
+        cam_orientation[0] = 0.;
+        cam_orientation[1] = 0.;
+
+        let camera = Camera{
+            fov: [PI/4.; 2],
+            im_size: [200; 2],
+            orientation: cam_orientation,
+            position: cam_position
+        };
+
+        camera.render(1, 3, 1., &mut space);
+
+        assert!(true);
     }
 }
