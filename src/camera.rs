@@ -74,10 +74,19 @@ impl Camera {
                         r += rgb[0] as f64;
                         g += rgb[1] as f64;
                         b += rgb[2] as f64;
+                    } else {
+                        r = 255.;
+                        g = 0.;
+                        b = 0.;
                     }
                 }
             }
-            *pixel = image::Rgb([r as u8, g as u8, b as u8])
+            let max = r.max(g.max(b));
+            *pixel = image::Rgb([
+                (r * 255. / max) as u8,
+                (g * 255. / max) as u8,
+                (b * 255. / max) as u8,
+            ])
         }
         let title = "render.png";
         img.save(title).expect("Problem on saving image");

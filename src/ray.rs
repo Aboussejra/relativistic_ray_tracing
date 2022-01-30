@@ -112,6 +112,10 @@ impl Ray {
         // Performs the number of calls to next_step() specified in argument
         println!("-----Trace : {}-----", number_steps);
         let blackhole = Obstacle::BlackHole { r: space.rs };
+        let _obstacle = Obstacle::Ring {
+            r_min: 3. * space.rs,
+            r_max: 5. * space.rs,
+        };
         for n in 0..number_steps {
             let old_position = &self.position.clone();
             self.next_step(d_lambda, space);
