@@ -32,9 +32,9 @@ impl Camera {
         let mut img: RgbImage = ImageBuffer::new(self.im_size[0], self.im_size[1]);
 
         for (x, y, pixel) in img.enumerate_pixels_mut() {
-            let mut r:f64 = 0.;
-            let mut g:f64 = 0.;
-            let mut b:f64 = 0.;
+            let mut r: f64 = 0.;
+            let mut g: f64 = 0.;
+            let mut b: f64 = 0.;
             for ray_x in 0..n_rays {
                 for ray_y in 0..n_rays {
                     let cx = (x as f64 - (size_x_float - 1.) / 2.) * self.fov[0] / size_x_float
@@ -68,15 +68,16 @@ impl Camera {
                         space,
                     );
                     let d_lambda = step_size;
-                    ray.trace(space, number_steps, d_lambda, false);
-
-                    r += 1.;
-                    g += 1.;
-                    b += 1.;
+                    let result_trace = ray.trace(space, number_steps, d_lambda, false);
+                    if let Some(collision) = result_trace {
+                        let rgb = collision.color;
+                        r += rgb[0] as f64;
+                        g += rgb[1] as f64;
+                        b += rgb[2] as f64;
+                    }
                 }
             }
-            *pixel = image::Rgb([r as u8, g as u8, b as u8]);
-            // TODO : assign correct colors to pixel
+            *pixel = image::Rgb([r as u8, g as u8, b as u8])
         }
         let title = "render.png";
         img.save(title).expect("Problem on saving image");

@@ -1,6 +1,9 @@
 use ndarray::Array1;
 
-use crate::{obstacle::Obstacle, space::Space};
+use crate::{
+    obstacle::{CollisionPoint, Obstacle},
+    space::Space,
+};
 
 static C: f64 = 1.;
 
@@ -20,8 +23,8 @@ impl Ray {
     }
     pub fn new_i(
         step_size: f64,
-        initial_position: &Array1<f64>,     // Size 4 (t, r, theta, phi)
-        initial_orientation: &Array1<f64>,  // Size 2 (theta, phi)
+        initial_position: &Array1<f64>,    // Size 4 (t, r, theta, phi)
+        initial_orientation: &Array1<f64>, // Size 2 (theta, phi)
         initial_velocity: f64,
         space: &Space,
     ) -> Self {
@@ -128,12 +131,12 @@ impl Ray {
                 .sqrt();
                 println!("                     velocity = {v}", v = true_velocity);
             }
-            let new_position = self.position.clone();
-            let has_collided = blackhole.collision(&old_position, &new_position);
+            let new_position = &self.position.clone();
+            let has_collided = blackhole.collision(old_position, new_position);
             if has_collided {
                 return Some(CollisionPoint {
-                    has_collided,
                     collision_point: new_position.clone(),
+                    color: blackhole.color(new_position),
                 });
             }
         }
