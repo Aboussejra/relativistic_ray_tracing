@@ -99,7 +99,13 @@ impl Ray {
             initial_position_derivative + d_lambda / 6. * (k1 + 2. * k2 + 2. * k3 + k4);
     }
 
-    pub fn trace(&mut self, space: &mut Space, number_steps: i32, d_lambda: f64, verbose: bool) {
+    pub fn trace(
+        &mut self,
+        space: &mut Space,
+        number_steps: i32,
+        d_lambda: f64,
+        verbose: bool,
+    ) -> Option<CollisionPoint> {
         // Performs the number of calls to next_step() specified in argument
         println!("-----Trace : {}-----", number_steps);
         let blackhole = Obstacle::BlackHole { r: space.rs };
@@ -118,15 +124,20 @@ impl Ray {
                 let true_velocity = (self.position_derivative[1].powf(2.)
                     + (self.position_derivative[2] * self.position[1]).powf(2.)
                     + (self.position_derivative[3] * self.position[1] * self.position[2].sin())
-                    .powf(2.))
-                    .sqrt();
+                        .powf(2.))
+                .sqrt();
                 println!("                     velocity = {v}", v = true_velocity);
             }
-            let new_position = &self.position.clone();
-            if blackhole.collision(&old_position, new_position) {
-                break;
+            let new_position = self.position.clone();
+            let has_collided = blackhole.collision(&old_position, &new_position);
+            if has_collided {
+                return Some(CollisionPoint {
+                    has_collided,
+                    collision_point: new_position.clone(),
+                });
             }
         }
+        None
     }
 }
 
