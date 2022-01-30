@@ -1,6 +1,6 @@
+use image::Rgb;
 use ndarray::Array1;
 use std::f64::consts::PI;
-
 #[derive(Debug, Clone, PartialEq)]
 pub enum Obstacle {
     BlackHole { r: f64 },            // Ray cannot enter black hole
@@ -24,6 +24,13 @@ impl Obstacle {
                 let r_intersect = ray_pos_t[1] * (1. - alpha) + ray_pos_t_plus_dt[1] * alpha; // Radial position of intersection point
                 alpha >= 0. && alpha <= 1. && r_intersect >= *r_min && r_intersect <= *r_max
             }
+        }
+    }
+    pub fn color(&self, _ray_pos: &Array1<f64>) -> Rgb<u8> {
+        match self {
+            Obstacle::BlackHole { r: _ } => Rgb::<u8>([0, 0, 0]),
+            Obstacle::MaxDistance { r: _ } => Rgb::<u8>([0, 0, 0]),
+            Obstacle::Ring { r_min: _, r_max: _ } => Rgb::<u8>([255, 255, 255]),
         }
     }
 }
