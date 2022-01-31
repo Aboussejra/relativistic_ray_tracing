@@ -12,8 +12,8 @@ impl Space {
         let r = position[1];
         let theta = position[2];
 
-        let a = 1. / (1. - self.rs / r);
-        let ap = -self.rs / (r - self.rs).sqrt();
+        let a = 1. / (1. - (self.rs / r));
+        let ap = -self.rs / ((r - self.rs).powi(2));
         let b = self.c * self.c * (self.rs / r - 1.);
         let bp = -self.c * self.c * self.rs / (r * r);
 
@@ -25,7 +25,7 @@ impl Space {
         self.christoffel[[1, 0, 0]] = -bp / (2. * a);
         self.christoffel[[1, 1, 1]] = ap / (2. * a);
         self.christoffel[[1, 2, 2]] = -r / a;
-        self.christoffel[[1, 3, 3]] = -r * (theta.sin().powi(2)) / a;
+        self.christoffel[[1, 3, 3]] = -r * ((theta.sin()).powi(2)) / a;
 
         // i = 2 : Theta
         self.christoffel[[2, 0, 0]] = 0.;

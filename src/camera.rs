@@ -37,14 +37,14 @@ impl Camera {
             let mut b: f64 = 0.;
             for ray_x in 0..n_rays {
                 for ray_y in 0..n_rays {
-                    let cx = (x as f64 - (size_x_float - 1.) / 2.) * self.fov[0] / size_x_float
-                        + (ray_x as f64 - n_rays_float / 2.) * self.fov[0]
-                            / (size_x_float * (n_rays_float - 1.));
-                    let cy = (y as f64 - (size_y_float - 1.) / 2.) * self.fov[1] / size_y_float
-                        + (ray_y as f64 - n_rays_float / 2.) * self.fov[1]
-                            / (size_y_float * (n_rays_float - 1.));
-                    let theta = PI + (cx.powf(2.) + cy.powf(2.)).sqrt();
-                    let phi = PI / 2. + self.orientation[1] + atan2(cy, cx).in_radians();
+                    let cx = ((x as f64) - (size_x_float - 1.) / 2.) * self.fov[0] / size_x_float
+                        + ((ray_x as f64) - n_rays_float / 2.) * self.fov[0]
+                            / (size_x_float * (n_rays_float));
+                    let cy = ((y as f64) - (size_y_float - 1.) / 2.) * self.fov[1] / size_y_float
+                        + ((ray_y as f64) - n_rays_float / 2.) * self.fov[1]
+                            / (size_y_float * (n_rays_float));
+                    let theta = PI + (cx.powi(2) + cy.powi(2)).sqrt();
+                    let phi = PI / 2. + self.orientation[2] + atan2(cy, cx).in_radians();
                     if (theta - PI) == 0. {
                         println!(
                             "Zero Angle Theta: for i = {}, j = {} are {},{}",
@@ -75,9 +75,15 @@ impl Camera {
                         g += rgb[1] as f64;
                         b += rgb[2] as f64;
                     } else {
-                        r = 255.;
-                        g = 0.;
-                        b = 0.;
+                        if f64::is_nan(ray.position[1]) {
+                            r += 255.;
+                            g += 0.;
+                            b += 0.;
+                        } else {
+                            r += 0.;
+                            g += 0.;
+                            b += 255.;
+                        }
                     }
                 }
             }
