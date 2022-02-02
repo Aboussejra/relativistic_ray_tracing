@@ -118,7 +118,7 @@ impl Ray {
             println!("-----Trace : {}-----", number_steps);
         }
         let blackhole = Obstacle::BlackHole { r: space.rs };
-        let _obstacle = Obstacle::Ring {
+        let obstacle = Obstacle::Ring {
             r_min: 3. * space.rs,
             r_max: 5. * space.rs,
         };
@@ -167,11 +167,18 @@ impl Ray {
                 println!("                     velocity = {v}", v = true_velocity);
             }
             let new_position = &self.position.clone();
-            let has_collided = blackhole.collision(old_position, new_position);
-            if has_collided {
+            let has_collided_bh = blackhole.collision(old_position, new_position);
+            let has_collided_ring = obstacle.collision(old_position, new_position);
+            if has_collided_bh {
                 return Some(CollisionPoint {
                     collision_point: new_position.clone(),
                     color: blackhole.color(new_position),
+                });
+            }
+            else if has_collided_ring {
+                return Some(CollisionPoint {
+                    collision_point: new_position.clone(),
+                    color: obstacle.color(new_position),
                 });
             }
         }

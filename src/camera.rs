@@ -31,6 +31,7 @@ impl Camera {
         let size_y_float = size_y as f64;
         let mut img: RgbImage = ImageBuffer::new(self.im_size[0], self.im_size[1]);
 
+        let mut progression = 0;
         for (x, y, pixel) in img.enumerate_pixels_mut() {
             let mut r: f64 = 0.;
             let mut g: f64 = 0.;
@@ -92,7 +93,11 @@ impl Camera {
                 (r * 255. / max) as u8,
                 (g * 255. / max) as u8,
                 (b * 255. / max) as u8,
-            ])
+            ]);
+            progression += 1;
+            if progression%100 == 0 {
+                println!("Progression : {} %", progression as f64 / (size_x_float*size_y_float) * 100.);
+            }
         }
         let title = "render.png";
         img.save(title).expect("Problem on saving image");

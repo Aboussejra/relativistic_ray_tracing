@@ -156,7 +156,7 @@ mod unit_tests {
 
         let mut cam_position = Array1::<f64>::zeros(3);
         cam_position[0] = 800.;
-        cam_position[1] = PI / 2.;
+        cam_position[1] = PI * 0.48;
         let mut cam_orientation = Array1::<f64>::zeros(3);
         cam_orientation[0] = 0.;
         cam_orientation[1] = 0.;

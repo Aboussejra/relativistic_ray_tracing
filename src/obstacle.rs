@@ -28,9 +28,9 @@ impl Obstacle {
     }
     pub fn color(&self, _ray_pos: &Array1<f64>) -> Rgb<u8> {
         match self {
-            Obstacle::BlackHole { r: _ } => Rgb::<u8>([255, 255, 255]),
-            Obstacle::MaxDistance { r: _ } => Rgb::<u8>([0, 0, 0]),
-            Obstacle::Ring { r_min: _, r_max: _ } => Rgb::<u8>([255, 255, 255]),
+            Obstacle::BlackHole { r: _ } => Rgb::<u8>([0, 0, 0]),
+            Obstacle::MaxDistance { r: _ } => Rgb::<u8>([10, 10, 10]),
+            Obstacle::Ring { r_min: _, r_max: _ } => Rgb::<u8>([255, 255, 10]),
         }
     }
 }
