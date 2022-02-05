@@ -14,6 +14,7 @@ mod unit_tests {
     use ndarray::{Array1, Array3};
     use relativistic_ray_tracing::camera::Camera;
     use relativistic_ray_tracing::{ray::Ray, space::Space};
+    use relativistic_ray_tracing::obstacle::Obstacle;
 
     #[test]
     fn ray_tracing() {
@@ -24,6 +25,7 @@ mod unit_tests {
             rs: 1.0,
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
+            obstacles: Vec::new()
         };
 
         let mut ray = Ray::new();
@@ -48,6 +50,7 @@ mod unit_tests {
             rs: 1.0,
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
+            obstacles: Vec::new()
         };
         let C: f64 = space.c;
         let mut position = Array1::<f64>::zeros(4);
@@ -79,6 +82,7 @@ mod unit_tests {
             rs: 100.,
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
+            obstacles: Vec::new()
         };
         let mut position = Array1::<f64>::zeros(4);
         position[1] = 200.;
@@ -148,14 +152,23 @@ mod unit_tests {
 
     #[test]
     fn test_render() {
+        let black_hole_radius = 100.;
+        let camera_distance = 800.;
+        let blackhole = Obstacle::BlackHole { r: black_hole_radius };
+        let ring = Obstacle::Ring {
+            r_min: 3. * black_hole_radius,
+            r_max: 5. * black_hole_radius,
+        };
+        let max_radius = Obstacle::MaxDistance { r: camera_distance * 1.1 };
         let mut space = Space {
             rs: 100.0,
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
+            obstacles: Vec::from([blackhole, max_radius, ring])
         };
 
         let mut cam_position = Array1::<f64>::zeros(3);
-        cam_position[0] = 800.;
+        cam_position[0] = camera_distance;
         cam_position[1] = PI * 0.48;
         let mut cam_orientation = Array1::<f64>::zeros(3);
         cam_orientation[0] = 0.;

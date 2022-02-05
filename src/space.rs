@@ -1,10 +1,12 @@
+use crate::obstacle::Obstacle;
 use ndarray::{Array1, Array3};
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Space {
     pub rs: f64,
     pub c: f64,
     pub christoffel: Array3<f64>,
+    pub obstacles: Vec<Obstacle>,
 }
 
 impl Space {
