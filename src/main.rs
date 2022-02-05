@@ -163,12 +163,12 @@ mod unit_tests {
 
         let camera = Camera {
             fov: [PI / 4.; 2],
-            im_size: [10; 2],
+            im_size: [100; 2],
             orientation: cam_orientation,
             position: cam_position,
         };
 
-        camera.render(1, 3, 2., &mut space);
+        camera.render(1, 1000, 2., &mut space);
 
         assert!(true);
     }
