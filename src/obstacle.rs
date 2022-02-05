@@ -13,23 +13,39 @@ pub struct CollisionPoint {
     pub color: Rgb<u8>,
 }
 impl Obstacle {
-    pub fn collision(&self, ray_pos_t: &Array1<f64>, ray_pos_t_plus_dt: &Array1<f64>) -> bool {
+    pub fn collision(&self, ray_pos_t: &Array1<f64>, ray_pos_t_plus_dt: &Array1<f64>) -> f64 {
         match self {
-            Obstacle::BlackHole { r } => ray_pos_t_plus_dt[1] <= *r,
-            Obstacle::MaxDistance { r } => ray_pos_t_plus_dt[1] >= *r,
+            Obstacle::BlackHole { r } => {
+                if ray_pos_t_plus_dt[1] <= *r {
+                    return 0.;
+                } else {
+                    return -1.;
+                }
+            }
+            Obstacle::MaxDistance { r } => {
+                if ray_pos_t_plus_dt[1] >= *r {
+                    return 0.;
+                } else {
+                    return -1.;
+                }
+            }
             Obstacle::Ring { r_min, r_max } => {
-                // Find intersection between path and ring: p_intersect = alpha * ray_pos2 + (1-alpha) * ray_pos1
-                let alpha = (PI / 2. - (ray_pos_t[2] % PI).abs())
+                // Find intersection between path and ring: p_intersect = a * ray_pos2 + (1-a) * ray_pos1
+                let a = (PI / 2. - (ray_pos_t[2] % PI).abs())
                     / ((ray_pos_t_plus_dt[2] % PI).abs() - (ray_pos_t[2] % PI).abs()); // We search for an intersection in the equator plane defined by (theta=PI/2)
-                let r_intersect = ray_pos_t[1] * (1. - alpha) + ray_pos_t_plus_dt[1] * alpha; // Radial position of intersection point
-                (0. ..=1.).contains(&alpha) && r_intersect >= *r_min && r_intersect <= *r_max
+                let r_intersect = ray_pos_t[1] * (1. - a) + ray_pos_t_plus_dt[1] * a; // Radial position of intersection point
+                if (0. ..=1.).contains(&a) && r_intersect >= *r_min && r_intersect <= *r_max {
+                    return a;
+                } else {
+                    return -1.;
+                }
             }
         }
     }
     pub fn color(&self, _ray_pos: &Array1<f64>) -> Rgb<u8> {
         match self {
             Obstacle::BlackHole { r: _ } => Rgb::<u8>([0, 0, 0]),
-            Obstacle::MaxDistance { r: _ } => Rgb::<u8>([10, 10, 10]),
+            Obstacle::MaxDistance { r: _ } => Rgb::<u8>([0, 50, 0]),
             Obstacle::Ring { r_min: _, r_max: _ } => Rgb::<u8>([255, 255, 10]),
         }
     }
