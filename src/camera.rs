@@ -79,7 +79,7 @@ impl Camera {
                             space,
                         );
                         let d_lambda = step_size;
-                        let result_trace = ray.trace(space, number_steps, d_lambda, false);
+                        let result_trace = ray.trace(space, number_steps, d_lambda, true, false);
                         if let Some(collision) = result_trace {
                             let rgb = collision.color;
                             r += rgb[0] as f64;
