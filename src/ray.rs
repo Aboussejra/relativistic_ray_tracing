@@ -171,18 +171,16 @@ impl Ray {
                 println!("                     velocity = {v}", v = true_velocity);
             }
             let new_position = &self.position.clone();
-            let has_collided_bh = blackhole.collision(old_position, new_position);
-            let has_collided_ring = obstacle.collision(old_position, new_position);
-            if has_collided_bh {
-                return Some(CollisionPoint {
-                    collision_point: new_position.clone(),
-                    color: blackhole.color(new_position),
-                });
-            } else if has_collided_ring {
-                return Some(CollisionPoint {
-                    collision_point: new_position.clone(),
-                    color: obstacle.color(new_position),
-                });
+            for obs in &space.obstacles {
+                let interpolation = obs.collision(old_position, new_position);
+                if interpolation >= 0. {
+                    let collision_position =
+                        new_position * interpolation + old_position * (1. - interpolation);
+                    return Some(CollisionPoint {
+                        collision_point: collision_position.clone(),
+                        color: obs.color(&collision_position),
+                    });
+                }
             }
         }
         None
