@@ -107,7 +107,8 @@ impl Ray {
         &mut self,
         space: &Space,
         number_steps: i32,
-        d_lambda: f64,
+        step_size: f64,
+        adaptive_step: bool,
         verbose: bool,
     ) -> Option<CollisionPoint> {
         // Performs the number of calls to next_step() specified in argument
@@ -131,6 +132,20 @@ impl Ray {
         }
         for n in 0..number_steps {
             let old_position = &self.position.clone();
+            let mut d_lambda = step_size;
+            if adaptive_step {
+                d_lambda = (step_size * (1. - space.rs / self.position[1]).abs())
+                    .max(space.rs * step_size / 400.);
+                let pole_orth_velocity = ((self.position[1] * self.position_derivative[2]).powi(2)
+                    + (self.position[1] * self.position_derivative[3] * (self.position[2]).sin())
+                        .powi(2))
+                .sqrt();
+
+                let pole_distance = self.position[1] * self.position[2].sin();
+                if pole_distance.abs() < step_size * pole_orth_velocity {
+                    d_lambda = step_size.sqrt() * pole_distance / pole_orth_velocity / 10.;
+                }
+            }
             self.next_step(d_lambda, space);
             if verbose {
                 print!("Step {} out of {}", n + 1, number_steps);
