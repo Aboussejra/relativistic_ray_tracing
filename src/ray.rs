@@ -1,7 +1,7 @@
 use ndarray::Array1;
 
 use crate::{
-    obstacle::{CollisionPoint, Obstacle},
+    obstacle::CollisionPoint,
     space::Space,
 };
 
@@ -116,14 +116,6 @@ impl Ray {
         // Performs the number of calls to next_step() specified in argument
         if verbose {
             println!("-----Trace : {}-----", number_steps);
-        }
-        let blackhole = Obstacle::BlackHole { r: space.rs };
-        let obstacle = Obstacle::Ring {
-            r_min: 3. * space.rs,
-            r_max: 5. * space.rs,
-        };
-
-        if verbose {
             print!("Initial state : ");
             print!(
                 " : t = {t}   r = {r}   theta = {th}   phi = {p}",
@@ -167,19 +159,16 @@ impl Ray {
                 println!("                     velocity = {v}", v = true_velocity);
             }
             let new_position = &self.position.clone();
-            let has_collided_bh = blackhole.collision(old_position, new_position);
-            let has_collided_ring = obstacle.collision(old_position, new_position);
-            if has_collided_bh {
-                return Some(CollisionPoint {
-                    collision_point: new_position.clone(),
-                    color: blackhole.color(new_position),
-                });
-            }
-            else if has_collided_ring {
-                return Some(CollisionPoint {
-                    collision_point: new_position.clone(),
-                    color: obstacle.color(new_position),
-                });
+            for obs in &space.obstacles {
+                let interpolation = obs.collision(old_position, new_position);
+                if interpolation >= 0.
+                {
+                    let collision_position = new_position * interpolation + old_position * (1. - interpolation);
+                    return Some(CollisionPoint {
+                        collision_point: collision_position.clone(),
+                        color: obs.color(&collision_position),
+                    });
+                }
             }
         }
         None
