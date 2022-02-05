@@ -71,7 +71,7 @@ impl Ray {
         }
     }
 
-    fn next_step(&mut self, d_lambda: f64, space: &mut Space) {
+    fn next_step(&mut self, d_lambda: f64, space: &Space) {
         // Runge kutta 4 integration method, computes one step
         let initial_position = &self.position;
         let initial_position_derivative = &self.position_derivative;
@@ -105,7 +105,7 @@ impl Ray {
 
     pub fn trace(
         &mut self,
-        space: &mut Space,
+        space: &Space,
         number_steps: i32,
         step_size: f64,
         adaptive_step: bool,
@@ -171,16 +171,18 @@ impl Ray {
                 println!("                     velocity = {v}", v = true_velocity);
             }
             let new_position = &self.position.clone();
-            for obs in &space.obstacles {
-                let interpolation = obs.collision(old_position, new_position);
-                if interpolation >= 0. {
-                    let collision_position =
-                        new_position * interpolation + old_position * (1. - interpolation);
-                    return Some(CollisionPoint {
-                        collision_point: collision_position.clone(),
-                        color: obs.color(&collision_position),
-                    });
-                }
+            let has_collided_bh = blackhole.collision(old_position, new_position);
+            let has_collided_ring = obstacle.collision(old_position, new_position);
+            if has_collided_bh {
+                return Some(CollisionPoint {
+                    collision_point: new_position.clone(),
+                    color: blackhole.color(new_position),
+                });
+            } else if has_collided_ring {
+                return Some(CollisionPoint {
+                    collision_point: new_position.clone(),
+                    color: obstacle.color(new_position),
+                });
             }
         }
         None
@@ -191,15 +193,16 @@ fn second_derivative(
     // Computes second derivative of movement at given position and velocity, in given space
     position: &Array1<f64>,
     position_derivative: &Array1<f64>,
-    space: &mut Space,
+    space: &Space,
 ) -> Array1<f64> {
-    space.update_christoffel(position);
+    let updated_space = space.update_christoffel(position);
     let mut second_derivative = Array1::<f64>::zeros(4);
     for i in 0..4 {
         for j in 0..4 {
             for k in 0..4 {
-                second_derivative[i] -=
-                    space.christoffel[[i, j, k]] * position_derivative[j] * position_derivative[k];
+                second_derivative[i] -= updated_space.christoffel[[i, j, k]]
+                    * position_derivative[j]
+                    * position_derivative[k];
             }
         }
     }

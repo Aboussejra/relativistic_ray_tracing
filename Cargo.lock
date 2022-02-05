@@ -358,6 +358,7 @@ dependencies = [
  "image",
  "ndarray",
  "num-integer",
+ "rayon",
 ]
 
 [[package]]
