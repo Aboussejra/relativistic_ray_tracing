@@ -39,11 +39,11 @@ impl Camera {
             for ray_x in 0..n_rays {
                 for ray_y in 0..n_rays {
                     let cx = ((x as f64) - (size_x_float - 1.) / 2.) * self.fov[0] / size_x_float
-                        + ((ray_x as f64) - n_rays_float / 2.) * self.fov[0]
-                            / (size_x_float * (n_rays_float));
+                        + ((ray_x as f64) - (n_rays_float - 1.) / 2.) * self.fov[0]
+                            / (size_x_float * n_rays_float);
                     let cy = ((y as f64) - (size_y_float - 1.) / 2.) * self.fov[1] / size_y_float
-                        + ((ray_y as f64) - n_rays_float / 2.) * self.fov[1]
-                            / (size_y_float * (n_rays_float));
+                        + ((ray_y as f64) - (n_rays_float - 1.) / 2.) * self.fov[1]
+                            / (size_y_float * n_rays_float);
                     let theta = PI + (cx.powi(2) + cy.powi(2)).sqrt();
                     let phi = PI / 2. + self.orientation[2] + atan2(cy, cx).in_radians();
                     if (theta - PI) == 0. {
@@ -69,7 +69,7 @@ impl Camera {
                         space,
                     );
                     let d_lambda = step_size;
-                    let result_trace = ray.trace(space, number_steps, d_lambda, false);
+                    let result_trace = ray.trace(space, number_steps, d_lambda, true, false);
                     if let Some(collision) = result_trace {
                         let rgb = collision.color;
                         r += rgb[0] as f64;
@@ -95,8 +95,11 @@ impl Camera {
                 (b * 255. / max) as u8,
             ]);
             progression += 1;
-            if progression%100 == 0 {
-                println!("Progression : {} %", progression as f64 / (size_x_float*size_y_float) * 100.);
+            if progression % 100 == 0 {
+                println!(
+                    "Progression : {} %",
+                    progression as f64 / (size_x_float * size_y_float) * 100.
+                );
             }
         }
         let title = "render.png";

@@ -16,13 +16,19 @@ impl Obstacle {
     pub fn collision(&self, ray_pos_t: &Array1<f64>, ray_pos_t_plus_dt: &Array1<f64>) -> f64 {
         match self {
             Obstacle::BlackHole { r } => {
-                if ray_pos_t_plus_dt[1] <= *r {return 0.;}
-                else {return -1.;}
-            },
+                if ray_pos_t_plus_dt[1] <= *r {
+                    return 0.;
+                } else {
+                    return -1.;
+                }
+            }
             Obstacle::MaxDistance { r } => {
-                if ray_pos_t_plus_dt[1] >= *r {return 0.;}
-                else {return -1.;}
-            },
+                if ray_pos_t_plus_dt[1] >= *r {
+                    return 0.;
+                } else {
+                    return -1.;
+                }
+            }
             Obstacle::Ring { r_min, r_max } => {
                 // Find intersection between path and ring: p_intersect = a * ray_pos2 + (1-a) * ray_pos1
                 let a = (PI / 2. - (ray_pos_t[2] % PI).abs())
@@ -30,8 +36,9 @@ impl Obstacle {
                 let r_intersect = ray_pos_t[1] * (1. - a) + ray_pos_t_plus_dt[1] * a; // Radial position of intersection point
                 if (0. ..=1.).contains(&a) && r_intersect >= *r_min && r_intersect <= *r_max {
                     return a;
+                } else {
+                    return -1.;
                 }
-                else {return -1.;}
             }
         }
     }

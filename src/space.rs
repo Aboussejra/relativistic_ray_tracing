@@ -1,7 +1,5 @@
+use crate::obstacle::Obstacle;
 use ndarray::{Array1, Array3};
-use crate::{
-    obstacle::Obstacle,
-};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Space {
