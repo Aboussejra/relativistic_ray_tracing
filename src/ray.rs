@@ -171,6 +171,9 @@ impl Ray {
                 println!("                     velocity = {v}", v = true_velocity);
             }
             let new_position = &self.position.clone();
+            if f64::is_nan(self.position[1]) {
+                return None;
+            }
             for obs in &space.obstacles {
                 let interpolation = obs.collision(old_position, new_position);
                 if interpolation >= 0. {
