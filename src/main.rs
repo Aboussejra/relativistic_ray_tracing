@@ -157,6 +157,9 @@ mod unit_tests {
         let blackhole = Obstacle::BlackHole {
             r: black_hole_radius,
         };
+        let blackholepred = Obstacle::BlackHolePredict {
+            r: black_hole_radius,
+        };
         let ring = Obstacle::Ring {
             r_min: 3. * black_hole_radius,
             r_max: 5. * black_hole_radius,
@@ -168,7 +171,7 @@ mod unit_tests {
             rs: 100.0,
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
-            obstacles: Vec::from([blackhole, max_radius, ring]),
+            obstacles: Vec::from([blackhole, max_radius, blackholepred, ring]),
         };
 
         let mut cam_position = Array1::<f64>::zeros(3);
@@ -179,13 +182,13 @@ mod unit_tests {
         cam_orientation[1] = 0.;
 
         let camera = Camera {
-            fov: [PI / 4.; 2],
-            im_size: [100; 2],
+            fov: [PI / 4., PI / 4.],
+            im_size: [50, 50],
             orientation: cam_orientation,
             position: cam_position,
         };
 
-        camera.render(1, 1000, 2., &mut space);
+        camera.render(1, 3, 4., &mut space);
 
         assert!(true);
     }

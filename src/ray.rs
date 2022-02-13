@@ -135,7 +135,7 @@ impl Ray {
             let mut d_lambda = step_size;
             if adaptive_step {
                 d_lambda = (step_size * (1. - space.rs / self.position[1]).abs())
-                    .max(space.rs * step_size / 400.);
+                    .max(space.rs * step_size / 200.);
                 let pole_orth_velocity = ((self.position[1] * self.position_derivative[2]).powi(2)
                     + (self.position[1] * self.position_derivative[3] * (self.position[2]).sin())
                         .powi(2))
