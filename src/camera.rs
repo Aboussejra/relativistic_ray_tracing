@@ -35,9 +35,9 @@ impl Camera {
         let coordinates: Vec<(u32, u32)> = img
             .enumerate_pixels()
             .into_iter()
-            .map(|(x, y, pixel)| (x, y))
+            .map(|(x, y, _)| (x, y))
             .collect();
-        let mut progression = 0;
+        let progression = 0;
         let vec_pixels: Vec<Rgb<u8>> = coordinates
             .into_par_iter()
             .map(|(x, y)| {
@@ -113,7 +113,7 @@ impl Camera {
                 pixel
             })
             .collect();
-        for ((x, y, pixel_img), pixel_calculated) in img.enumerate_pixels_mut().zip(vec_pixels) {
+        for ((_, _, pixel_img), pixel_calculated) in img.enumerate_pixels_mut().zip(vec_pixels) {
             *pixel_img = pixel_calculated;
         }
         let title = "render.png";
