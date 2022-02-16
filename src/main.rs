@@ -21,7 +21,7 @@ mod unit_tests {
         let position = Array1::<f64>::ones(4).mapv(|elem| elem * 2.);
         println!("test {:?}", position);
 
-        let mut espace = Space {
+        let espace = Space {
             rs: 1.0,
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
@@ -41,12 +41,12 @@ mod unit_tests {
         ray.position[1] = 6.;
         ray.position[2] = PI / 2.;
         ray.position_derivative[0] = 1.;
-        ray.trace(&mut espace, 10, 1., true, false);
+        ray.trace(&espace, 10, 1., true, false);
     }
 
     #[test]
     fn circular_orbit() {
-        let mut space = Space {
+        let space = Space {
             rs: 1.0,
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
@@ -65,7 +65,7 @@ mod unit_tests {
         let number_steps = 1600;
         let mut ray = Ray::new_i(step_size, &position, &orientation, initial_velocity, &space);
 
-        ray.trace(&mut space, number_steps, step_size, true, true);
+        ray.trace(&space, number_steps, step_size, true, true);
 
         let error_margin = 1e-3;
         println!("Test initial position : {:?}", position);
@@ -78,7 +78,7 @@ mod unit_tests {
 
     #[test]
     fn outward_escape() {
-        let mut space = Space {
+        let space = Space {
             rs: 100.,
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
@@ -96,7 +96,7 @@ mod unit_tests {
         let number_steps = 100;
         let mut ray = Ray::new_i(step_size, &position, &orientation, initial_velocity, &space);
 
-        ray.trace(&mut space, number_steps, step_size, true, true);
+        ray.trace(&space, number_steps, step_size, true, true);
 
         let error_margin = 1e-3;
         println!("Test initial position : {:?}", position);
@@ -183,13 +183,11 @@ mod unit_tests {
 
         let camera = Camera {
             fov: [PI / 4., PI / 4.],
-            im_size: [400, 400],
+            im_size: [200, 200],
             orientation: cam_orientation,
             position: cam_position,
         };
 
         camera.render(4, 1000, 4., &mut space);
-
-        assert!(true);
     }
 }

@@ -5,6 +5,7 @@ use ndarray::Array1;
 use num_integer::Roots;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::f64::consts::PI;
+use std::sync::atomic::AtomicUsize;
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Camera {
     pub position: Array1<f64>,    // r, theta, phi
@@ -31,13 +32,13 @@ impl Camera {
         let size_y = self.im_size[1];
         let size_y_float = size_y as f64;
         let mut img: RgbImage = ImageBuffer::new(self.im_size[0], self.im_size[1]);
-
         let coordinates: Vec<(u32, u32)> = img
             .enumerate_pixels()
             .into_iter()
             .map(|(x, y, _)| (x, y))
             .collect();
-        let _progression = 0;
+        let n_steps = coordinates.len();
+        let progression = AtomicUsize::new(0);
         let vec_pixels: Vec<Rgb<f64>> = coordinates
             .into_par_iter()
             .map(|(x, y)| {
@@ -96,13 +97,15 @@ impl Camera {
                         }
                     }
                 }
+                let progression_counter =
+                    progression.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                if progression_counter % (n_steps / 10) == 0 {
+                    println!(
+                        "Progression : {:?} %",
+                        (progression_counter as f64 / (n_steps as f64)) * 100.,
+                    );
+                }
                 image::Rgb([r, g, b])
-                // if progression % 100 == 0 {
-                //     println!(
-                //         "Progression : {} %",
-                //         progression as f64 / (size_x_float * size_y_float) * 100.
-                //     );
-                // };
             })
             .collect();
         let max_value: f64 = vec_pixels
@@ -110,7 +113,6 @@ impl Camera {
             .map(|pixel| pixel[0].max(pixel[1]).max(pixel[2]))
             .reduce(f64::max)
             .expect("This iterator is not empty");
-        println!("max value is {}", max_value);
         for ((_, _, pixel_img), pixel_calculated) in img.enumerate_pixels_mut().zip(vec_pixels) {
             let r = (pixel_calculated[0] / max_value * 255.) as u8;
             let g = (pixel_calculated[1] / max_value * 255.) as u8;
