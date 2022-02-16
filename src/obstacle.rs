@@ -11,7 +11,7 @@ pub enum Obstacle {
 #[derive(Debug, Clone, PartialEq)]
 pub struct CollisionPoint {
     pub collision_point: Array1<f64>,
-    pub color: Rgb<u8>,
+    pub color: Rgb<f64>,
 }
 impl Obstacle {
     pub fn collision(&self, ray_pos_t: &Array1<f64>, ray_pos_t_plus_dt: &Array1<f64>) -> f64 {
@@ -82,12 +82,12 @@ impl Obstacle {
             }
         }
     }
-    pub fn color(&self, _ray_pos: &Array1<f64>) -> Rgb<u8> {
+    pub fn color(&self, _ray_pos: &Array1<f64>) -> Rgb<f64> {
         match self {
-            Obstacle::BlackHole { r: _ } => Rgb::<u8>([0, 0, 0]),
-            Obstacle::BlackHolePredict { r: _ } => Rgb::<u8>([255, 0, 255]),
-            Obstacle::MaxDistance { r: _ } => Rgb::<u8>([0, 20, 50]),
-            Obstacle::Ring { r_min: _, r_max: _ } => Rgb::<u8>([255, 255, 10]),
+            Obstacle::BlackHole { r: _ } => Rgb::<f64>([0., 0., 0.]),
+            Obstacle::BlackHolePredict { r: _ } => Rgb::<f64>([255., 0., 255.]),
+            Obstacle::MaxDistance { r: _ } => Rgb::<f64>([0., 20., 50.]),
+            Obstacle::Ring { r_min: _, r_max: _ } => Rgb::<f64>([255., 240., 10.]),
         }
     }
 }

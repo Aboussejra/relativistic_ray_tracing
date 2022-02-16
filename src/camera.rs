@@ -1,6 +1,6 @@
 use crate::{ray::Ray, space::Space};
 use ang::atan2;
-use image::{ImageBuffer, Rgb, RgbImage};
+use image::{ImageBuffer, Rgb, RgbImage, buffer, ColorType, Primitive};
 use ndarray::Array1;
 use num_integer::Roots;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -38,7 +38,7 @@ impl Camera {
             .map(|(x, y, _)| (x, y))
             .collect();
         let progression = 0;
-        let vec_pixels: Vec<Rgb<u8>> = coordinates
+        let vec_pixels: Vec<Rgb<f64>> = coordinates
             .into_par_iter()
             .map(|(x, y)| {
                 let mut r: f64 = 0.;
@@ -98,12 +98,15 @@ impl Camera {
                         }
                     }
                 }
+                /*
                 let max = r.max(g.max(b));
                 let pixel = image::Rgb([
                     (r * 255. / max) as u8,
                     (g * 255. / max) as u8,
                     (b * 255. / max) as u8,
                 ]);
+                */
+                let pixel = image::Rgb([r, g, b]);
                 if progression % 100 == 0 {
                     println!(
                         "Progression : {} %",
@@ -113,8 +116,15 @@ impl Camera {
                 pixel
             })
             .collect();
+        let mut max_value: f64 = 0.;
+        for i in 0..vec_pixels.len() {
+            max_value = vec_pixels[i][0].max(vec_pixels[i][1]).max(vec_pixels[i][2]);
+        }
         for ((_, _, pixel_img), pixel_calculated) in img.enumerate_pixels_mut().zip(vec_pixels) {
-            *pixel_img = pixel_calculated;
+            let r = (pixel_calculated[0]/max_value * 255.) as u8;
+            let g = (pixel_calculated[1]/max_value * 255.) as u8;
+            let b = (pixel_calculated[2]/max_value * 255.) as u8;
+            *pixel_img = Rgb::from([r, g, b]);
         }
         let title = "render.png";
         img.save(title).expect("Problem on saving image");
