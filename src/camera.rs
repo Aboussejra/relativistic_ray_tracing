@@ -1,6 +1,6 @@
 use crate::{ray::Ray, space::Space};
 use ang::atan2;
-use image::{ImageBuffer, Rgb, RgbImage, buffer, ColorType, Primitive};
+use image::{ImageBuffer, Rgb, RgbImage};
 use ndarray::Array1;
 use num_integer::Roots;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -37,7 +37,7 @@ impl Camera {
             .into_iter()
             .map(|(x, y, _)| (x, y))
             .collect();
-        let progression = 0;
+        let _progression = 0;
         let vec_pixels: Vec<Rgb<f64>> = coordinates
             .into_par_iter()
             .map(|(x, y)| {
@@ -85,45 +85,36 @@ impl Camera {
                             r += rgb[0] as f64;
                             g += rgb[1] as f64;
                             b += rgb[2] as f64;
+                        } else if f64::is_nan(ray.position[1]) {
+                            r += 255.;
+                            g += 0.;
+                            b += 0.;
                         } else {
-                            if f64::is_nan(ray.position[1]) {
-                                r += 255.;
-                                g += 0.;
-                                b += 0.;
-                            } else {
-                                r += 0.;
-                                g += 0.;
-                                b += 255.;
-                            }
+                            r += 0.;
+                            g += 0.;
+                            b += 255.;
                         }
                     }
                 }
-                /*
-                let max = r.max(g.max(b));
-                let pixel = image::Rgb([
-                    (r * 255. / max) as u8,
-                    (g * 255. / max) as u8,
-                    (b * 255. / max) as u8,
-                ]);
-                */
-                let pixel = image::Rgb([r, g, b]);
-                if progression % 100 == 0 {
-                    println!(
-                        "Progression : {} %",
-                        progression as f64 / (size_x_float * size_y_float) * 100.
-                    );
-                };
-                pixel
+                image::Rgb([r, g, b])
+                // if progression % 100 == 0 {
+                //     println!(
+                //         "Progression : {} %",
+                //         progression as f64 / (size_x_float * size_y_float) * 100.
+                //     );
+                // };
             })
             .collect();
-        let mut max_value: f64 = 0.;
-        for i in 0..vec_pixels.len() {
-            max_value = vec_pixels[i][0].max(vec_pixels[i][1]).max(vec_pixels[i][2]);
-        }
+        let max_value: f64 = vec_pixels
+            .iter()
+            .map(|pixel| pixel[0].max(pixel[1]).max(pixel[2]))
+            .reduce(f64::max)
+            .expect("This iterator is not empty");
+        println!("max value is {}", max_value);
         for ((_, _, pixel_img), pixel_calculated) in img.enumerate_pixels_mut().zip(vec_pixels) {
-            let r = (pixel_calculated[0]/max_value * 255.) as u8;
-            let g = (pixel_calculated[1]/max_value * 255.) as u8;
-            let b = (pixel_calculated[2]/max_value * 255.) as u8;
+            let r = (pixel_calculated[0] / max_value * 255.) as u8;
+            let g = (pixel_calculated[1] / max_value * 255.) as u8;
+            let b = (pixel_calculated[2] / max_value * 255.) as u8;
             *pixel_img = Rgb::from([r, g, b]);
         }
         let title = "render.png";

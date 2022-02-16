@@ -183,12 +183,12 @@ mod unit_tests {
 
         let camera = Camera {
             fov: [PI / 4., PI / 4.],
-            im_size: [50, 50],
+            im_size: [400, 400],
             orientation: cam_orientation,
             position: cam_position,
         };
 
-        camera.render(1, 3, 4., &mut space);
+        camera.render(4, 1000, 4., &mut space);
 
         assert!(true);
     }

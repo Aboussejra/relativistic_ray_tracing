@@ -18,16 +18,16 @@ impl Obstacle {
         match self {
             Obstacle::BlackHole { r } => {
                 if ray_pos_t_plus_dt[1] <= *r {
-                    return 0.;
+                    0.
                 } else {
-                    return -1.;
+                    -1.
                 }
             }
             Obstacle::MaxDistance { r } => {
                 if ray_pos_t_plus_dt[1] >= *r {
-                    return 0.;
+                    0.
                 } else {
-                    return -1.;
+                    -1.
                 }
             }
             Obstacle::BlackHolePredict { r } => {
@@ -64,9 +64,9 @@ impl Obstacle {
 
                 // If the conditions are met the ray is pointing towards the black hole: we delete it prematurely
                 if t11 < t21 && t12 > t22 {
-                    return 0.;
+                    0.
                 } else {
-                    return -1.;
+                    -1.
                 }
             }
             Obstacle::Ring { r_min, r_max } => {
@@ -75,9 +75,9 @@ impl Obstacle {
                     / ((ray_pos_t_plus_dt[2] % PI).abs() - (ray_pos_t[2] % PI).abs()); // We search for an intersection in the equator plane defined by (theta=PI/2)
                 let r_intersect = ray_pos_t[1] * (1. - a) + ray_pos_t_plus_dt[1] * a; // Radial position of intersection point
                 if (0. ..=1.).contains(&a) && r_intersect >= *r_min && r_intersect <= *r_max {
-                    return a;
+                    a
                 } else {
-                    return -1.;
+                    -1.
                 }
             }
         }
@@ -85,7 +85,7 @@ impl Obstacle {
     pub fn color(&self, _ray_pos: &Array1<f64>) -> Rgb<f64> {
         match self {
             Obstacle::BlackHole { r: _ } => Rgb::<f64>([0., 0., 0.]),
-            Obstacle::BlackHolePredict { r: _ } => Rgb::<f64>([255., 0., 255.]),
+            Obstacle::BlackHolePredict { r: _ } => Rgb::<f64>([0., 0., 0.]),
             Obstacle::MaxDistance { r: _ } => Rgb::<f64>([0., 20., 50.]),
             Obstacle::Ring { r_min: _, r_max: _ } => Rgb::<f64>([255., 240., 10.]),
         }
