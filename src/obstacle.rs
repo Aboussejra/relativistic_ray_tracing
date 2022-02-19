@@ -1,6 +1,8 @@
 use image::Rgb;
 use ndarray::Array1;
+use noise::{HybridMulti, MultiFractal, NoiseFn, Seedable};
 use std::f64::consts::PI;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Obstacle {
     BlackHole { r: f64 },            // Ray cannot enter black hole
@@ -82,12 +84,21 @@ impl Obstacle {
             }
         }
     }
-    pub fn color(&self, _ray_pos: &Array1<f64>) -> Rgb<f64> {
+    pub fn color(&self, ray_pos: &Array1<f64>) -> Rgb<f64> {
         match self {
             Obstacle::BlackHole { r: _ } => Rgb::<f64>([0., 0., 0.]),
             Obstacle::BlackHolePredict { r: _ } => Rgb::<f64>([0., 0., 0.]),
             Obstacle::MaxDistance { r: _ } => Rgb::<f64>([0., 20., 50.]),
-            Obstacle::Ring { r_min: _, r_max: _ } => Rgb::<f64>([255., 240., 10.]),
+            Obstacle::Ring { r_min: _, r_max: _ } => {
+                let random_gen = HybridMulti::default()
+                    .set_frequency(0.05)
+                    .set_octaves(6)
+                    .set_lacunarity(2.)
+                    .set_persistence(0.8)
+                    .set_seed(0);
+                let val = random_gen.get([ray_pos[1], ray_pos[2] / PI / 10.]).powi(2) * 255.;
+                Rgb::<f64>([val, val * 0.7, 0.])
+            }
         }
     }
 }
