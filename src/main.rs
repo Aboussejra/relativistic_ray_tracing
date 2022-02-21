@@ -160,9 +160,14 @@ mod unit_tests {
         let blackholepred = Obstacle::BlackHolePredict {
             r: black_hole_radius,
         };
-        let ring = Obstacle::Ring {
+        let _ring = Obstacle::Ring {
             r_min: 3. * black_hole_radius,
             r_max: 5. * black_hole_radius,
+        };
+        let accretionDisk = Obstacle::AccretionDisk {
+            r_min: 3. * black_hole_radius,
+            r_max: 5. * black_hole_radius,
+            thickness: black_hole_radius / 100.,
         };
         let max_radius = Obstacle::MaxDistance {
             r: camera_distance * 1.1,
@@ -171,7 +176,7 @@ mod unit_tests {
             rs: 100.0,
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
-            obstacles: Vec::from([blackhole, max_radius, blackholepred, ring]),
+            obstacles: Vec::from([blackhole, max_radius, blackholepred, accretionDisk]),
         };
 
         let mut cam_position = Array1::<f64>::zeros(3);

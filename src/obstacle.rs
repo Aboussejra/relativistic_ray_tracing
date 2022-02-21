@@ -1,14 +1,30 @@
 use image::Rgb;
+//use std::rand::{task_rng, Rng};
 use ndarray::Array1;
 use noise::{HybridMulti, MultiFractal, NoiseFn, Seedable};
+use rand::prelude::*;
 use std::f64::consts::PI;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Obstacle {
-    BlackHole { r: f64 },            // Ray cannot enter black hole
-    BlackHolePredict { r: f64 },     // Ray cannot point towards black hole
-    MaxDistance { r: f64 },          // Ray cannot escape max distance from origin
-    Ring { r_min: f64, r_max: f64 }, // 2D ring placed on the equator plane in spherical coordinates, with inner and outer radii
+    BlackHole {
+        r: f64,
+    }, // Ray cannot enter black hole
+    BlackHolePredict {
+        r: f64,
+    }, // Ray cannot point towards black hole
+    MaxDistance {
+        r: f64,
+    }, // Ray cannot escape max distance from origin
+    Ring {
+        r_min: f64,
+        r_max: f64,
+    }, // 2D ring placed on the equator plane in spherical coordinates, with inner and outer radii
+    AccretionDisk {
+        r_min: f64,
+        r_max: f64,
+        thickness: f64,
+    }, // Same as Ring, but semi-transparent and with thickness.
 }
 #[derive(Debug, Clone, PartialEq)]
 pub struct CollisionPoint {
@@ -16,7 +32,12 @@ pub struct CollisionPoint {
     pub color: Rgb<f64>,
 }
 impl Obstacle {
-    pub fn collision(&self, ray_pos_t: &Array1<f64>, ray_pos_t_plus_dt: &Array1<f64>) -> f64 {
+    pub fn collision(
+        &self,
+        ray_pos_t: &Array1<f64>,
+        ray_pos_t_plus_dt: &Array1<f64>,
+        step_size: f64,
+    ) -> f64 {
         match self {
             Obstacle::BlackHole { r } => {
                 if ray_pos_t_plus_dt[1] <= *r {
@@ -82,6 +103,49 @@ impl Obstacle {
                     -1.
                 }
             }
+            Obstacle::AccretionDisk {
+                r_min,
+                r_max,
+                thickness,
+            } => {
+                let a = (PI / 2. - (ray_pos_t[2] % PI).abs())
+                    / ((ray_pos_t_plus_dt[2] % PI).abs() - (ray_pos_t[2] % PI).abs()); // We search for an intersection in the equator plane defined by (theta=PI/2)
+                let r_intersect = ray_pos_t[1] * (1. - a) + ray_pos_t_plus_dt[1] * a; // Radial position of intersection point
+                                                                                      // First detection criterion : path segment intersects equator plan
+                let altitude_1 = (ray_pos_t[2] - PI / 2.).sin() * ray_pos_t[1];
+                let altitude_2 = (ray_pos_t_plus_dt[2] - PI / 2.).sin() * ray_pos_t_plus_dt[1];
+                let da = altitude_2 - altitude_1;
+                let mut collision_length = 0.;
+                let sign = if altitude_2 > altitude_1 { 1. } else { -1. };
+
+                // If the ray's too far, no collision --> ignore rest
+                if a.abs() > 2. || r_intersect < *r_min || r_intersect > *r_max {
+                    return -1.;
+                }
+
+                if altitude_1.abs() <= thickness / 2. && altitude_2.abs() <= thickness / 2. {
+                    collision_length = step_size;
+                    //println!("Both inside length : {}", collision_length);
+                } else if altitude_2.abs() <= thickness / 2. {
+                    collision_length = step_size * (thickness * sign / 2. + altitude_2) / da;
+                    //println!("2 inside length : {}", collision_length);
+                } else if altitude_1.abs() <= thickness / 2. {
+                    collision_length = step_size * (thickness * sign / 2. - altitude_1) / da;
+                    //println!("1 inside length : {}", collision_length);
+                } else if (0. ..=1.).contains(&a) {
+                    collision_length = step_size * thickness * sign / da;
+                    //println!("Through length : {}", collision_length);
+                }
+
+                let mut rng = rand::thread_rng();
+                let random_collision: f64 = rng.gen();
+                //println!("Collision_length = {}; prob = {}", collision_length, (-collision_length).exp());
+                if 1. - (-collision_length / 2.).exp() >= random_collision {
+                    collision_length
+                } else {
+                    -1.
+                }
+            }
         }
     }
     pub fn color(&self, ray_pos: &Array1<f64>) -> Rgb<f64> {
@@ -99,6 +163,11 @@ impl Obstacle {
                 let val = random_gen.get([ray_pos[1], ray_pos[2] / PI / 10.]).powi(2) * 255.;
                 Rgb::<f64>([val, val * 0.7, 0.])
             }
+            Obstacle::AccretionDisk {
+                r_min: _,
+                r_max: _,
+                thickness: _,
+            } => Rgb::<f64>([255., 240., 10.]),
         }
     }
 }
