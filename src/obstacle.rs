@@ -31,6 +31,19 @@ pub struct CollisionPoint {
     pub collision_point: Array1<f64>,
     pub color: Rgb<f64>,
 }
+pub fn accretion_texture(r_min: &f64, r_max: &f64, ray_pos: &Array1<f64>) -> Rgb<f64> {
+    let random_gen = HybridMulti::default()
+        .set_frequency(0.03)
+        .set_octaves(6)
+        .set_lacunarity(2.)
+        .set_persistence(0.8)
+        .set_seed(0);
+    let val = random_gen.get([ray_pos[1], ray_pos[2] / PI / 10.]).abs()
+        * (-(ray_pos[1] - r_min) / (r_max - r_min) * 2.).exp()
+        * 255.
+        * 3.;
+    Rgb::<f64>([val, val * 0.7, 0.])
+}
 impl Obstacle {
     pub fn collision(
         &self,
@@ -153,21 +166,12 @@ impl Obstacle {
             Obstacle::BlackHole { r: _ } => Rgb::<f64>([0., 0., 0.]),
             Obstacle::BlackHolePredict { r: _ } => Rgb::<f64>([0., 0., 0.]),
             Obstacle::MaxDistance { r: _ } => Rgb::<f64>([0., 20., 50.]),
-            Obstacle::Ring { r_min: _, r_max: _ } => {
-                let random_gen = HybridMulti::default()
-                    .set_frequency(0.05)
-                    .set_octaves(6)
-                    .set_lacunarity(2.)
-                    .set_persistence(0.8)
-                    .set_seed(0);
-                let val = random_gen.get([ray_pos[1], ray_pos[2] / PI / 10.]).powi(2) * 255.;
-                Rgb::<f64>([val, val * 0.7, 0.])
-            }
+            Obstacle::Ring { r_min, r_max } => accretion_texture(r_min, r_max, ray_pos),
             Obstacle::AccretionDisk {
-                r_min: _,
-                r_max: _,
+                r_min,
+                r_max,
                 thickness: _,
-            } => Rgb::<f64>([255., 240., 10.]),
+            } => accretion_texture(r_min, r_max, ray_pos),
         }
     }
 }

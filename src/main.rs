@@ -162,11 +162,11 @@ mod unit_tests {
         };
         let _ring = Obstacle::Ring {
             r_min: 3. * black_hole_radius,
-            r_max: 5. * black_hole_radius,
+            r_max: 6. * black_hole_radius,
         };
         let accretionDisk = Obstacle::AccretionDisk {
             r_min: 3. * black_hole_radius,
-            r_max: 5. * black_hole_radius,
+            r_max: 6. * black_hole_radius,
             thickness: black_hole_radius / 100.,
         };
         let max_radius = Obstacle::MaxDistance {
@@ -188,7 +188,7 @@ mod unit_tests {
 
         let camera = Camera {
             fov: [PI / 4., PI / 4.],
-            im_size: [200, 200],
+            im_size: [50, 50],
             orientation: cam_orientation,
             position: cam_position,
         };
