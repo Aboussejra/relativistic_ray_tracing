@@ -175,7 +175,7 @@ impl Ray {
                 return None;
             }
             for obs in &space.obstacles {
-                let interpolation = obs.collision(old_position, new_position);
+                let interpolation = obs.collision(old_position, new_position, d_lambda);
                 if interpolation >= 0. {
                     let collision_position =
                         new_position * interpolation + old_position * (1. - interpolation);
