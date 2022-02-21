@@ -31,20 +31,56 @@ pub struct CollisionPoint {
     pub collision_point: Array1<f64>,
     pub color: Rgb<f64>,
 }
-pub fn accretion_texture(r_min: &f64, r_max: &f64, ray_pos: &Array1<f64>) -> Rgb<f64> {
+static BLACKBODY_INTERP: [[f64; 3]; 20] = [
+    [1.0000, 0.0401, 0.0000],
+    [1.0000, 0.2484, 0.0061],
+    [1.0000, 0.4589, 0.1483],
+    [1.0000, 0.6354, 0.3684],
+    [1.0000, 0.7792, 0.6180],
+    [1.0000, 0.8952, 0.8666],
+    [0.9102, 0.9000, 1.0000],
+    [0.7644, 0.8139, 1.0000],
+    [0.6693, 0.7541, 1.0000],
+    [0.6033, 0.7106, 1.0000],
+    [0.5551, 0.6776, 1.0000],
+    [0.5187, 0.6519, 1.0000],
+    [0.4904, 0.6314, 1.0000],
+    [0.4677, 0.6146, 1.0000],
+    [0.4493, 0.6007, 1.0000],
+    [0.4341, 0.5890, 1.0000],
+    [0.4212, 0.5791, 1.0000],
+    [0.4103, 0.5705, 1.0000],
+    [0.4009, 0.5630, 1.0000],
+    [0.3928, 0.5565, 1.0000],
+];
+pub fn accretion_texture(r_min: &f64, _r_max: &f64, ray_pos: &Array1<f64>) -> Rgb<f64> {
     let random_gen = HybridMulti::default()
         .set_frequency(0.03)
         .set_octaves(6)
         .set_lacunarity(2.)
         .set_persistence(0.8)
         .set_seed(0);
-    let blackbodylum = ((1. - (r_min/ray_pos[1]).sqrt()) * (r_min/ray_pos[1]).powi(3))
-    / (0.488 as f64).powi(4);
+    let blackbodylum = ((1. - (r_min / ray_pos[1]).sqrt()) * (r_min / ray_pos[1]).powi(3))
+        / (0.488_f64).powi(4)
+        * (random_gen.get([ray_pos[1], ray_pos[2] / PI / 10.]).abs() + 1.);
     //if blackbodylum>0.9 {println!("{}", blackbodylum);}
-    let val = (random_gen.get([ray_pos[1], ray_pos[2] / PI / 10.]).abs() + 1.)
-        * blackbodylum
-        * 255.;
-    Rgb::<f64>([val*0.3277, val*0.5022, val])
+
+    let val = blackbodylum * 255.;
+
+    let maxtemp = 3.;
+    let temp = blackbodylum.powf(0.25) * maxtemp;
+    let interp = temp - temp.floor();
+    Rgb::<f64>([
+        ((BLACKBODY_INTERP[temp.floor() as usize][0] * (1. - interp)
+            + BLACKBODY_INTERP[(temp.floor() + 1.) as usize][0] * interp)
+            * val),
+        ((BLACKBODY_INTERP[temp.floor() as usize][1] * (1. - interp)
+            + BLACKBODY_INTERP[(temp.floor() + 1.) as usize][1] * interp)
+            * val),
+        ((BLACKBODY_INTERP[temp.floor() as usize][2] * (1. - interp)
+            + BLACKBODY_INTERP[(temp.floor() + 1.) as usize][2] * interp)
+            * val),
+    ])
 }
 impl Obstacle {
     pub fn collision(
@@ -125,14 +161,17 @@ impl Obstacle {
             } => {
                 let altitude_1 = (ray_pos_t[2] - PI / 2.).sin() * ray_pos_t[1];
                 let altitude_2 = (ray_pos_t_plus_dt[2] - PI / 2.).sin() * ray_pos_t_plus_dt[1];
-                if altitude_1*altitude_2 > 0. && altitude_1.abs() > thickness/2. && altitude_2.abs() > thickness/2. {
+                if altitude_1 * altitude_2 > 0.
+                    && altitude_1.abs() > thickness / 2.
+                    && altitude_2.abs() > thickness / 2.
+                {
                     return -1.;
                 }
                 // Find intersection between path and ring: p_intersect = a * ray_pos2 + (1-a) * ray_pos1
                 let a = (PI / 2. - (ray_pos_t[2] % PI).abs())
-                    / ((ray_pos_t_plus_dt[2] % PI).abs() - (ray_pos_t[2] % PI).abs());      // We search for an intersection in the equator plane defined by (theta=PI/2)
-                let r_intersect = ray_pos_t[1] * (1. - a) + ray_pos_t_plus_dt[1] * a;   // Radial position of intersection point
-                                                                                            // First detection criterion : path segment intersects equator plan
+                    / ((ray_pos_t_plus_dt[2] % PI).abs() - (ray_pos_t[2] % PI).abs()); // We search for an intersection in the equator plane defined by (theta=PI/2)
+                let r_intersect = ray_pos_t[1] * (1. - a) + ray_pos_t_plus_dt[1] * a; // Radial position of intersection point
+                                                                                      // First detection criterion : path segment intersects equator plan
                 let da = altitude_2 - altitude_1;
                 let mut collision_length = 0.;
                 let mut collision_point = 0.;

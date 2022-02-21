@@ -24,7 +24,14 @@ impl Camera {
         }
     }
 
-    pub fn render(&self, n_rays: usize, number_steps: i32, step_size: f64, space: &mut Space) {
+    pub fn render(
+        &self,
+        n_rays: usize,
+        number_steps: i32,
+        step_size: f64,
+        space: &mut Space,
+        exposition: f64,
+    ) {
         let n_rays = n_rays.sqrt();
         let n_rays_float = n_rays as f64;
         let size_x = self.im_size[0];
@@ -114,9 +121,9 @@ impl Camera {
             .reduce(f64::max)
             .expect("This iterator is not empty");
         for ((_, _, pixel_img), pixel_calculated) in img.enumerate_pixels_mut().zip(vec_pixels) {
-            let r = (pixel_calculated[0] / max_value * 255.) as u8;
-            let g = (pixel_calculated[1] / max_value * 255.) as u8;
-            let b = (pixel_calculated[2] / max_value * 255.) as u8;
+            let r = (pixel_calculated[0] / max_value * 255. * exposition).min(255.) as u8;
+            let g = (pixel_calculated[1] / max_value * 255. * exposition).min(255.) as u8;
+            let b = (pixel_calculated[2] / max_value * 255. * exposition).min(255.) as u8;
             *pixel_img = Rgb::from([r, g, b]);
         }
         let title = "render.png";

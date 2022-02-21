@@ -153,7 +153,7 @@ mod unit_tests {
     #[test]
     fn test_render() {
         let black_hole_radius = 100.;
-        let camera_distance = 30.*black_hole_radius;
+        let camera_distance = 30. * black_hole_radius;
         let blackhole = Obstacle::BlackHole {
             r: black_hole_radius,
         };
@@ -193,6 +193,6 @@ mod unit_tests {
             position: cam_position,
         };
 
-        camera.render(4, 1000, 4., &mut space);
+        camera.render(4, 1000, 4., &mut space, 2.5);
     }
 }
