@@ -38,11 +38,13 @@ pub fn accretion_texture(r_min: &f64, r_max: &f64, ray_pos: &Array1<f64>) -> Rgb
         .set_lacunarity(2.)
         .set_persistence(0.8)
         .set_seed(0);
-    let val = random_gen.get([ray_pos[1], ray_pos[2] / PI / 10.]).abs()
-        * (-(ray_pos[1] - r_min) / (r_max - r_min) * 2.).exp()
-        * 255.
-        * 3.;
-    Rgb::<f64>([val, val * 0.7, 0.])
+    let blackbodylum = ((1. - (r_min/ray_pos[1]).sqrt()) * (r_min/ray_pos[1]).powi(3))
+    / (0.488 as f64).powi(4);
+    //if blackbodylum>0.9 {println!("{}", blackbodylum);}
+    let val = (random_gen.get([ray_pos[1], ray_pos[2] / PI / 10.]).abs() + 1.)
+        * blackbodylum
+        * 255.;
+    Rgb::<f64>([val*0.3277, val*0.5022, val])
 }
 impl Obstacle {
     pub fn collision(
@@ -121,14 +123,19 @@ impl Obstacle {
                 r_max,
                 thickness,
             } => {
-                let a = (PI / 2. - (ray_pos_t[2] % PI).abs())
-                    / ((ray_pos_t_plus_dt[2] % PI).abs() - (ray_pos_t[2] % PI).abs()); // We search for an intersection in the equator plane defined by (theta=PI/2)
-                let r_intersect = ray_pos_t[1] * (1. - a) + ray_pos_t_plus_dt[1] * a; // Radial position of intersection point
-                                                                                      // First detection criterion : path segment intersects equator plan
                 let altitude_1 = (ray_pos_t[2] - PI / 2.).sin() * ray_pos_t[1];
                 let altitude_2 = (ray_pos_t_plus_dt[2] - PI / 2.).sin() * ray_pos_t_plus_dt[1];
+                if altitude_1*altitude_2 > 0. && altitude_1.abs() > thickness/2. && altitude_2.abs() > thickness/2. {
+                    return -1.;
+                }
+                // Find intersection between path and ring: p_intersect = a * ray_pos2 + (1-a) * ray_pos1
+                let a = (PI / 2. - (ray_pos_t[2] % PI).abs())
+                    / ((ray_pos_t_plus_dt[2] % PI).abs() - (ray_pos_t[2] % PI).abs());      // We search for an intersection in the equator plane defined by (theta=PI/2)
+                let r_intersect = ray_pos_t[1] * (1. - a) + ray_pos_t_plus_dt[1] * a;   // Radial position of intersection point
+                                                                                            // First detection criterion : path segment intersects equator plan
                 let da = altitude_2 - altitude_1;
                 let mut collision_length = 0.;
+                let mut collision_point = 0.;
                 let sign = if altitude_2 > altitude_1 { 1. } else { -1. };
 
                 // If the ray's too far, no collision --> ignore rest
@@ -138,15 +145,19 @@ impl Obstacle {
 
                 if altitude_1.abs() <= thickness / 2. && altitude_2.abs() <= thickness / 2. {
                     collision_length = step_size;
+                    collision_point = 0.5;
                     //println!("Both inside length : {}", collision_length);
                 } else if altitude_2.abs() <= thickness / 2. {
                     collision_length = step_size * (thickness * sign / 2. + altitude_2) / da;
+                    collision_point = 1.;
                     //println!("2 inside length : {}", collision_length);
                 } else if altitude_1.abs() <= thickness / 2. {
                     collision_length = step_size * (thickness * sign / 2. - altitude_1) / da;
+                    collision_point = 0.;
                     //println!("1 inside length : {}", collision_length);
                 } else if (0. ..=1.).contains(&a) {
                     collision_length = step_size * thickness * sign / da;
+                    collision_point = a;
                     //println!("Through length : {}", collision_length);
                 }
 
@@ -154,7 +165,7 @@ impl Obstacle {
                 let random_collision: f64 = rng.gen();
                 //println!("Collision_length = {}; prob = {}", collision_length, (-collision_length).exp());
                 if 1. - (-collision_length / 2.).exp() >= random_collision {
-                    collision_length
+                    collision_point
                 } else {
                     -1.
                 }
@@ -165,7 +176,7 @@ impl Obstacle {
         match self {
             Obstacle::BlackHole { r: _ } => Rgb::<f64>([0., 0., 0.]),
             Obstacle::BlackHolePredict { r: _ } => Rgb::<f64>([0., 0., 0.]),
-            Obstacle::MaxDistance { r: _ } => Rgb::<f64>([0., 20., 50.]),
+            Obstacle::MaxDistance { r: _ } => Rgb::<f64>([0., 0., 0.]),
             Obstacle::Ring { r_min, r_max } => accretion_texture(r_min, r_max, ray_pos),
             Obstacle::AccretionDisk {
                 r_min,
