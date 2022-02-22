@@ -167,7 +167,7 @@ mod unit_tests {
         let accretionDisk = Obstacle::AccretionDisk {
             r_min: 3. * black_hole_radius,
             r_max: 20. * black_hole_radius,
-            thickness: black_hole_radius / 100.,
+            thickness: 1.,
         };
         let max_radius = Obstacle::MaxDistance {
             r: camera_distance * 1.1,

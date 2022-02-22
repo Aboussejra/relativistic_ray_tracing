@@ -53,7 +53,12 @@ static BLACKBODY_INTERP: [[f64; 3]; 20] = [
     [0.4009, 0.5630, 1.0000],
     [0.3928, 0.5565, 1.0000],
 ];
-pub fn accretion_texture(r_min: &f64, _r_max: &f64, ray_pos: &Array1<f64>) -> Rgb<f64> {
+pub fn accretion_texture(
+    r_min: &f64,
+    _r_max: &f64,
+    ray_pos: &Array1<f64>,
+    max_temperature: f64,
+) -> Rgb<f64> {
     let random_gen = HybridMulti::default()
         .set_frequency(0.03)
         .set_octaves(6)
@@ -63,23 +68,21 @@ pub fn accretion_texture(r_min: &f64, _r_max: &f64, ray_pos: &Array1<f64>) -> Rg
     let blackbodylum = ((1. - (r_min / ray_pos[1]).sqrt()) * (r_min / ray_pos[1]).powi(3))
         / (0.488_f64).powi(4)
         * (random_gen.get([ray_pos[1], ray_pos[2] / PI / 10.]).abs() + 1.);
-    //if blackbodylum>0.9 {println!("{}", blackbodylum);}
-
-    let val = blackbodylum * 255.;
-
-    let maxtemp = 3.;
-    let temp = blackbodylum.powf(0.25) * maxtemp;
+    let temp = blackbodylum.powf(0.25) * max_temperature / 1000.;
     let interp = temp - temp.floor();
     Rgb::<f64>([
         ((BLACKBODY_INTERP[temp.floor() as usize][0] * (1. - interp)
             + BLACKBODY_INTERP[(temp.floor() + 1.) as usize][0] * interp)
-            * val),
+            * blackbodylum
+            * 255.),
         ((BLACKBODY_INTERP[temp.floor() as usize][1] * (1. - interp)
             + BLACKBODY_INTERP[(temp.floor() + 1.) as usize][1] * interp)
-            * val),
+            * blackbodylum
+            * 255.),
         ((BLACKBODY_INTERP[temp.floor() as usize][2] * (1. - interp)
             + BLACKBODY_INTERP[(temp.floor() + 1.) as usize][2] * interp)
-            * val),
+            * blackbodylum
+            * 255.),
     ])
 }
 impl Obstacle {
@@ -199,11 +202,13 @@ impl Obstacle {
                     collision_point = a;
                     //println!("Through length : {}", collision_length);
                 }
-
+                let transmissibility = 1.
+                    - ((1. - (r_min / r_intersect).sqrt()) * (r_min / r_intersect).powi(3))
+                        / (0.488_f64).powi(4);
                 let mut rng = rand::thread_rng();
                 let random_collision: f64 = rng.gen();
                 //println!("Collision_length = {}; prob = {}", collision_length, (-collision_length).exp());
-                if 1. - (-collision_length / 2.).exp() >= random_collision {
+                if transmissibility.powf(collision_length) <= random_collision {
                     collision_point
                 } else {
                     -1.
@@ -216,12 +221,12 @@ impl Obstacle {
             Obstacle::BlackHole { r: _ } => Rgb::<f64>([0., 0., 0.]),
             Obstacle::BlackHolePredict { r: _ } => Rgb::<f64>([0., 0., 0.]),
             Obstacle::MaxDistance { r: _ } => Rgb::<f64>([0., 0., 0.]),
-            Obstacle::Ring { r_min, r_max } => accretion_texture(r_min, r_max, ray_pos),
+            Obstacle::Ring { r_min, r_max } => accretion_texture(r_min, r_max, ray_pos, 8000.),
             Obstacle::AccretionDisk {
                 r_min,
                 r_max,
                 thickness: _,
-            } => accretion_texture(r_min, r_max, ray_pos),
+            } => accretion_texture(r_min, r_max, ray_pos, 8000.),
         }
     }
 }
