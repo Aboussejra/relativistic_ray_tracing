@@ -193,6 +193,6 @@ mod unit_tests {
             position: cam_position,
         };
 
-        camera.render(4, 1000, 4., &mut space, 2.5);
+        camera.render(4, 1000, 4., &mut space, 2.5, 0.75);
     }
 }
