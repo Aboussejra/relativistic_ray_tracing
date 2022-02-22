@@ -1,10 +1,33 @@
 use image::Rgb;
-//use std::rand::{task_rng, Rng};
 use ndarray::Array1;
 use noise::{HybridMulti, MultiFractal, NoiseFn, Seedable};
 use rand::prelude::*;
 use std::f64::consts::PI;
 
+/// Different types of obstacles that can be generated inside the scene. Each
+/// obsctacle has its own collision rules and surface color, evaluated by the
+/// 'collision()' and 'color()' functions. The collision detection uses two
+/// consecutive positions to trace the moving object's path. Currently, the
+/// implemented types are:
+///
+///     - BlackHole: A collision is triggered whenever the current position is
+///             inside the event horizon (radial coordinate <= black hole
+///             radius). The color is pure black (0,0,0).
+///     - BlackHolePredict: Triggered whenever the direction deduced by the
+///             two positions points towards the black hole's disk. This helps
+///             to save useless computation by stopping a path early.
+///     - MaxDistance: Triggered if the distance to the origin exceeds an upper
+///             limit given by the 'r' parameter. Color is (0,0,0).
+///     - Ring: Flat ring placed on the equator plane (theta = PI/2 in spherical
+///             coordinates), bounded by its inner radius 'r_min' and outer
+///             radius 'r_max'. Collision is triggered when the path crosses
+///             the plane. The 'color()' function calls a separate
+///             'accretion_texture()' used to compute a procedural texture.
+///     - AccretionDisk: A 3D volumetric, semi-transparent version of the 'Ring'
+///             obstacle. Has an additional 'thickness' parameter. Uses the same
+///             texture but the collision has a probability to occur based on the
+///             path's length inside the volume.
+///
 #[derive(Debug, Clone, PartialEq)]
 pub enum Obstacle {
     BlackHole {
@@ -31,7 +54,12 @@ pub struct CollisionPoint {
     pub collision_point: Array1<f64>,
     pub color: Rgb<f64>,
 }
-static BLACKBODY_INTERP: [[f64; 3]; 20] = [
+/// (Temporary) Conversion table for black body radiation temperature to
+/// RGB values scaled between 0 and 1. Corresponding temperature is
+/// index * 1000 Kelvin.
+///
+static BLACKBODY_INTERP: [[f64; 3]; 21] = [
+    [0., 0., 0.],
     [1.0000, 0.0401, 0.0000],
     [1.0000, 0.2484, 0.0061],
     [1.0000, 0.4589, 0.1483],
