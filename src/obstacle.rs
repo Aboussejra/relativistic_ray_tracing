@@ -122,7 +122,7 @@ impl Obstacle {
     ) -> f64 {
         match self {
             Obstacle::BlackHole { r } => {
-                if ray_pos_t_plus_dt[1] <= *r {
+                if ray_pos_t_plus_dt[1] <= *r * 1.5 {
                     0.
                 } else {
                     -1.

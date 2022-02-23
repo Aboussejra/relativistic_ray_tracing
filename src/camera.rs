@@ -78,15 +78,9 @@ impl Camera {
                         let mut ray_orientation = Array1::<f64>::zeros(2);
                         ray_orientation[0] = theta;
                         ray_orientation[1] = phi;
-                        let initial_velocity = space.c;
 
-                        let mut ray = Ray::new_i(
-                            step_size,
-                            &ray_position,
-                            &ray_orientation,
-                            initial_velocity,
-                            space,
-                        );
+                        let mut ray =
+                            Ray::new_i(step_size, &ray_position, &ray_orientation, 1., space);
                         let d_lambda = step_size;
                         let result_trace = ray.trace(space, number_steps, d_lambda, true, false);
                         if let Some(collision) = result_trace {
