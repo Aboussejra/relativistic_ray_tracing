@@ -128,8 +128,9 @@ impl Ray {
                 .sqrt();
 
                 let pole_distance = self.position[1] * self.position[2].sin();
-                if pole_distance.abs() < step_size * pole_orth_velocity {
-                    d_lambda = step_size.sqrt() * pole_distance / pole_orth_velocity / 10.;
+                if pole_distance.abs() < step_size * pole_orth_velocity * 1.5 {
+                    //d_lambda = step_size.sqrt() * pole_distance / pole_orth_velocity / 10.;
+                    d_lambda = step_size.min(pole_distance / 20.);
                 }
             }
             self.next_step(d_lambda, space);
