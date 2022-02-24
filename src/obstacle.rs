@@ -4,6 +4,7 @@ use noise::{HybridMulti, MultiFractal, NoiseFn, Seedable};
 use rand::prelude::*;
 use std::f64::consts::PI;
 
+/*
 /// Different types of obstacles that can be generated inside the scene. Each
 /// obsctacle has its own collision rules and surface color, evaluated by the
 /// 'collision()' and 'color()' functions. The collision detection uses two
@@ -28,6 +29,7 @@ use std::f64::consts::PI;
 ///             texture but the collision has a probability to occur based on the
 ///             path's length inside the volume.
 ///
+/// */
 #[derive(Debug, Clone, PartialEq)]
 pub enum Obstacle {
     BlackHole {
