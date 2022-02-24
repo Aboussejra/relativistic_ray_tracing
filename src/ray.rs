@@ -134,7 +134,7 @@ impl Ray {
             }
             self.next_step(d_lambda, space);
             if verbose {
-                print!("Step {} out of {}", n + 1, number_steps);
+                print!("\n\n* Step {} out of {}", n + 1, number_steps);
                 print!(
                     " : t = {t}   r = {r}   theta = {th}   phi = {p}",
                     t = self.position[0],
@@ -149,12 +149,21 @@ impl Ray {
                     dth = self.position_derivative[2],
                     dp = self.position_derivative[3]
                 );
-                let true_velocity = (self.position_derivative[1].powf(2.)
-                    + (self.position_derivative[2] * self.position[1]).powf(2.)
-                    + (self.position_derivative[3] * self.position[1] * self.position[2].sin())
-                        .powf(2.))
+                println!("  -  Local step size : {}", d_lambda);
+                let distance = ((self.position[1] - old_position[1]).powi(2)
+                    / (1. - space.rs / self.position[1])
+                    + (self.position[2] - old_position[2]).powi(2) * (self.position[1].powi(2))
+                    + (self.position[3] - old_position[3]).powi(2)
+                        * ((self.position[1] * (self.position[2].sin())).powi(2)))
                 .sqrt();
-                println!("                     velocity = {v}", v = true_velocity);
+                println!("  -  Reference step size : {}", distance);
+                let momentum_conservation =
+                    - self.position_derivative[0].powi(2) * (1. - space.rs / self.position[1]) / space.c.powi(2)
+                    + self.position_derivative[1].powi(2) / (1. - space.rs / self.position[1])
+                    + (self.position_derivative[2] * self.position[1]).powi(2)
+                    + (self.position_derivative[3] * self.position[1] * self.position[2].sin())
+                        .powi(2);
+                println!("  -  Conservation of momentum = {}", momentum_conservation);
             }
             let new_position = &self.position.clone();
             if f64::is_nan(self.position[1]) {
