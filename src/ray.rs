@@ -157,8 +157,9 @@ impl Ray {
                         * ((self.position[1] * (self.position[2].sin())).powi(2)))
                 .sqrt();
                 println!("  -  Reference step size : {}", distance);
-                let momentum_conservation =
-                    - self.position_derivative[0].powi(2) * (1. - space.rs / self.position[1]) / space.c.powi(2)
+                let momentum_conservation = -self.position_derivative[0].powi(2)
+                    * (1. - space.rs / self.position[1])
+                    / space.c.powi(2)
                     + self.position_derivative[1].powi(2) / (1. - space.rs / self.position[1])
                     + (self.position_derivative[2] * self.position[1]).powi(2)
                     + (self.position_derivative[3] * self.position[1] * self.position[2].sin())

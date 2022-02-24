@@ -58,7 +58,7 @@ mod unit_tests {
         let mut orientation = Array1::<f64>::zeros(3);
         orientation[0] = PI / 2.;
         orientation[1] = PI / 2.;
-        let initial_velocity = space.c;//(C.powf(2.) * space.rs / 2. / (position[1] - space.rs)).sqrt();
+        let initial_velocity = space.c; //(C.powf(2.) * space.rs / 2. / (position[1] - space.rs)).sqrt();
 
         let step_size = 0.4;
         let number_steps = 50;
@@ -97,12 +97,12 @@ mod unit_tests {
 
         ray.trace(&space, number_steps, step_size, true, true);
 
-        let momentum_conservation =
-             - ray.position_derivative[0].powi(2) * (1. - space.rs / ray.position[1]) / space.c.powi(2)
+        let momentum_conservation = -ray.position_derivative[0].powi(2)
+            * (1. - space.rs / ray.position[1])
+            / space.c.powi(2)
             + ray.position_derivative[1].powi(2) / (1. - space.rs / ray.position[1])
             + (ray.position_derivative[2] * ray.position[1]).powi(2)
-            + (ray.position_derivative[3] * ray.position[1] * ray.position[2].sin())
-            .powi(2);
+            + (ray.position_derivative[3] * ray.position[1] * ray.position[2].sin()).powi(2);
 
         let error_margin = 1e-3;
         println!("Test initial position : {:?}", position);

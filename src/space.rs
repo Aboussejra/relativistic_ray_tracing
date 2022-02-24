@@ -43,12 +43,11 @@ impl Space {
     }
 
     pub fn metric(&self, position: &Array1<f64>) -> [f64; 4] {
-        let g = [
+        [
             -(1. - self.rs / position[1]) / (self.c.powi(2)),
             1. / (1. - self.rs / position[1]),
             position[1].powi(2),
             (position[1] * (position[2].sin())).powi(2),
-        ];
-        g
+        ]
     }
 }
