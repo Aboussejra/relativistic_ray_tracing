@@ -2,7 +2,7 @@ use ndarray::Array1;
 
 use crate::{obstacle::CollisionPoint, space::Space};
 
-static C: f64 = 1.;
+static _C: f64 = 1.;
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Ray {
@@ -18,53 +18,38 @@ impl Ray {
             position_derivative: Array1::<f64>::zeros(4),
         }
     }
+    ///Initializes a ray in given space and given integration step size with :
+    /// - initial position,
+    /// - initial movement direction (spherical coordinates in proper frame)
+    ///        (0,_) points outwards
+    ///        (pi,_) points inwards (towards black hole)
+    ///        (pi/2,0) is tangent, points towards the "north pole"
+    ///        (pi/2,pi/2) is tangent, follows the "latitudes"
+    /// - initial velocity magnitude
+    ///
     pub fn new_i(
-        step_size: f64,
+        _step_size: f64,
         initial_position: &Array1<f64>,    // Size 4 (t, r, theta, phi)
         initial_orientation: &Array1<f64>, // Size 2 (theta, phi)
-        initial_velocity: f64,
+        _initial_velocity: f64,
         space: &Space,
     ) -> Self {
-        /*  Initializes a ray in given space and given integration step size with :
-        *   - initial position,
-        *   - initial movement direction (spherical coordinates in proper frame)
-                (0,_) points outwards
-                (pi,_) points inwards (towards black hole)
-                (pi/2,0) is tangent, points towards the "north pole"
-                (pi/2,pi/2) is tangent, follows the "latitudes"
-        *   - initial velocity magnitude
-        */
+        /*
+        if initial_velocity != 1.{
+            println!("\nTime-like geodesics initialization not implemented yet. Initializing arrays to 0 instead...\n");
+            return Ray::new();
+        }*/
 
         let position = initial_position.clone();
         let mut position_derivative = Array1::<f64>::zeros(4);
-        position_derivative[1] = initial_velocity // dr coordinate
-            * step_size
-            * C
-            * (initial_orientation[0].cos())
-            * ((1. - (space.rs / initial_position[1])).sqrt());
-        position_derivative[2] = initial_velocity // dtheta coordinate
-            * step_size
-            * C
-            * (initial_orientation[0].sin())
-            * (initial_orientation[1].cos())
-            / initial_position[1];
-        position_derivative[3] = initial_velocity // dphi coordinate
-            * step_size
-            * C
-            * (initial_orientation[0].sin())
-            * (initial_orientation[1].sin())
-            / (initial_position[1] * (initial_position[2].sin()));
-        position_derivative[0] = (((step_size.powf(2.))
-            - (((position_derivative[1].powf(2.) / (1. - (space.rs / initial_position[1])))
-                + ((position_derivative[2] * initial_position[1]).powf(2.))
-                + ((position_derivative[3]
-                    * initial_position[1]
-                    * (initial_position[2].sin()))
-                .powf(2.)))
-                / (C.powf(2.))))
-            / (1. - (space.rs / initial_position[1])))
-            .max(0.)
-            .sqrt();
+        let metric = space.metric(&position);
+        position_derivative[0] = 1. / ((-metric[0]).sqrt());
+        position_derivative[1] = (initial_orientation[0].cos()) / (metric[1].sqrt());
+        position_derivative[2] =
+            (initial_orientation[0].sin()) * (initial_orientation[1].cos()) / (metric[2].sqrt());
+        position_derivative[3] =
+            (initial_orientation[0].sin()) * (initial_orientation[1].sin()) / (metric[3].sqrt());
+
         Ray {
             position,
             position_derivative,
@@ -101,6 +86,7 @@ impl Ray {
             + ((d_lambda.powf(2.)) / 6. * (k1 + k2 + k3));
         self.position_derivative =
             initial_position_derivative + (d_lambda / 6. * (k1 + (2. * k2) + (2. * k3) + k4));
+        //println!("Step size {}", d_lambda);
     }
 
     pub fn trace(
@@ -142,13 +128,14 @@ impl Ray {
                 .sqrt();
 
                 let pole_distance = self.position[1] * self.position[2].sin();
-                if pole_distance.abs() < step_size * pole_orth_velocity {
-                    d_lambda = step_size.sqrt() * pole_distance / pole_orth_velocity / 10.;
+                if pole_distance.abs() < step_size * pole_orth_velocity * 1.5 {
+                    //d_lambda = step_size.sqrt() * pole_distance / pole_orth_velocity / 10.;
+                    d_lambda = step_size.min(pole_distance / 20.);
                 }
             }
             self.next_step(d_lambda, space);
             if verbose {
-                print!("Step {} out of {}", n + 1, number_steps);
+                print!("\n\n* Step {} out of {}", n + 1, number_steps);
                 print!(
                     " : t = {t}   r = {r}   theta = {th}   phi = {p}",
                     t = self.position[0],
@@ -163,12 +150,22 @@ impl Ray {
                     dth = self.position_derivative[2],
                     dp = self.position_derivative[3]
                 );
-                let true_velocity = (self.position_derivative[1].powf(2.)
-                    + (self.position_derivative[2] * self.position[1]).powf(2.)
-                    + (self.position_derivative[3] * self.position[1] * self.position[2].sin())
-                        .powf(2.))
+                println!("  -  Local step size : {}", d_lambda);
+                let distance = ((self.position[1] - old_position[1]).powi(2)
+                    / (1. - space.rs / self.position[1])
+                    + (self.position[2] - old_position[2]).powi(2) * (self.position[1].powi(2))
+                    + (self.position[3] - old_position[3]).powi(2)
+                        * ((self.position[1] * (self.position[2].sin())).powi(2)))
                 .sqrt();
-                println!("                     velocity = {v}", v = true_velocity);
+                println!("  -  Reference step size : {}", distance);
+                let momentum_conservation = -self.position_derivative[0].powi(2)
+                    * (1. - space.rs / self.position[1])
+                    / space.c.powi(2)
+                    + self.position_derivative[1].powi(2) / (1. - space.rs / self.position[1])
+                    + (self.position_derivative[2] * self.position[1]).powi(2)
+                    + (self.position_derivative[3] * self.position[1] * self.position[2].sin())
+                        .powi(2);
+                println!("  -  Conservation of momentum = {}", momentum_conservation);
             }
             let new_position = &self.position.clone();
             if f64::is_nan(self.position[1]) {

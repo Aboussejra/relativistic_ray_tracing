@@ -52,17 +52,16 @@ mod unit_tests {
             christoffel: Array3::zeros((4, 4, 4)),
             obstacles: Vec::new(),
         };
-        let C: f64 = space.c;
         let mut position = Array1::<f64>::zeros(4);
-        position[1] = 6.;
+        position[1] = 1.5;
         position[2] = PI / 2.;
         let mut orientation = Array1::<f64>::zeros(3);
         orientation[0] = PI / 2.;
         orientation[1] = PI / 2.;
-        let initial_velocity = (C.powf(2.) * space.rs / 2. / (position[1] - space.rs)).sqrt();
+        let initial_velocity = space.c; //(C.powf(2.) * space.rs / 2. / (position[1] - space.rs)).sqrt();
 
-        let step_size = 0.01;
-        let number_steps = 1600;
+        let step_size = 0.4;
+        let number_steps = 50;
         let mut ray = Ray::new_i(step_size, &position, &orientation, initial_velocity, &space);
 
         ray.trace(&space, number_steps, step_size, true, true);
@@ -98,6 +97,13 @@ mod unit_tests {
 
         ray.trace(&space, number_steps, step_size, true, true);
 
+        let momentum_conservation = -ray.position_derivative[0].powi(2)
+            * (1. - space.rs / ray.position[1])
+            / space.c.powi(2)
+            + ray.position_derivative[1].powi(2) / (1. - space.rs / ray.position[1])
+            + (ray.position_derivative[2] * ray.position[1]).powi(2)
+            + (ray.position_derivative[3] * ray.position[1] * ray.position[2].sin()).powi(2);
+
         let error_margin = 1e-3;
         println!("Test initial position : {:?}", position);
         println!("Test final position : {:?}", ray.position);
@@ -105,7 +111,7 @@ mod unit_tests {
             (ray.position[1] > position[1])
                 && ((ray.position[2] - position[2]).abs() <= error_margin)
                 && ((ray.position[3] - position[3]).abs() <= error_margin)
-                && (ray.position_derivative[0].abs() <= error_margin)
+                && (momentum_conservation.abs() <= error_margin)
         );
     }
 
@@ -157,7 +163,7 @@ mod unit_tests {
         let blackhole = Obstacle::BlackHole {
             r: black_hole_radius,
         };
-        let blackholepred = Obstacle::BlackHolePredict {
+        let _blackholepred = Obstacle::BlackHolePredict {
             r: black_hole_radius,
         };
         let _ring = Obstacle::Ring {
@@ -176,23 +182,23 @@ mod unit_tests {
             rs: 100.0,
             c: 1.0,
             christoffel: Array3::zeros((4, 4, 4)),
-            obstacles: Vec::from([blackhole, max_radius, blackholepred, accretionDisk]),
+            obstacles: Vec::from([blackhole, max_radius, accretionDisk]),
         };
 
         let mut cam_position = Array1::<f64>::zeros(3);
         cam_position[0] = camera_distance;
-        cam_position[1] = PI * 0.48;
+        cam_position[1] = PI * 0.485;
         let mut cam_orientation = Array1::<f64>::zeros(3);
         cam_orientation[0] = 0.;
         cam_orientation[1] = 0.;
 
         let camera = Camera {
             fov: [PI / 3., PI / 6.],
-            im_size: [400, 200],
+            im_size: [200, 100],
             orientation: cam_orientation,
             position: cam_position,
         };
 
-        camera.render(4, 1000, 4., &mut space, 2.5, 0.75);
+        camera.render(4, 1000, 40., &mut space, 2.5, 0.75);
     }
 }
