@@ -90,14 +90,25 @@ pub fn accretion_texture(
     max_temperature: f64,
 ) -> Rgb<f64> {
     let random_gen = HybridMulti::default()
-        .set_frequency(0.03)
+        .set_frequency(1.)
         .set_octaves(6)
         .set_lacunarity(2.)
         .set_persistence(0.8)
         .set_seed(0);
+    let x_val = (ray_pos[1] / 10000.).sqrt();
+    let y_val_1 = ray_pos[3] / 30.;
+    let y_val_2 = ((ray_pos[3] + 2. * PI) % (2. * PI)) / 30.;
+    let random_value = ((random_gen.get([(x_val + y_val_1) * 4., (x_val - y_val_1)])
+        * (ray_pos[3].cos() + 1.)
+        / 2.)
+        .powi(2)
+        + (random_gen.get([(x_val + y_val_2) * 4., (x_val - y_val_2)]) * (1. - ray_pos[3].cos())
+            / 2.)
+            .powi(2))
+    .sqrt();
     let blackbodylum = ((1. - (r_min / ray_pos[1]).sqrt()) * (r_min / ray_pos[1]).powi(3))
         / (0.488_f64).powi(4)
-        * (random_gen.get([ray_pos[1], ray_pos[2] / PI / 10.]).abs() + 1.);
+        * (random_value.abs() + 0.5);
     let temp = blackbodylum.powf(0.25) * max_temperature / 1000.;
     let interp = temp - temp.floor();
     Rgb::<f64>([
