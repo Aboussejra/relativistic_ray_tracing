@@ -169,11 +169,13 @@ mod unit_tests {
         let _ring = Obstacle::Ring {
             r_min: 3. * black_hole_radius,
             r_max: 20. * black_hole_radius,
+            temperature: 3000.,
         };
         let accretionDisk = Obstacle::AccretionDisk {
             r_min: 3. * black_hole_radius,
             r_max: 20. * black_hole_radius,
             thickness: 1.,
+            temperature: 3000.,
         };
         let max_radius = Obstacle::MaxDistance {
             r: camera_distance * 1.1,

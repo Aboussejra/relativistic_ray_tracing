@@ -44,11 +44,13 @@ pub enum Obstacle {
     Ring {
         r_min: f64,
         r_max: f64,
+        temperature: f64,
     }, // 2D ring placed on the equator plane in spherical coordinates, with inner and outer radii
     AccretionDisk {
         r_min: f64,
         r_max: f64,
         thickness: f64,
+        temperature: f64,
     }, // Same as Ring, but semi-transparent and with thickness.
 }
 #[derive(Debug, Clone, PartialEq)]
@@ -187,7 +189,11 @@ impl Obstacle {
                     -1.
                 }
             }
-            Obstacle::Ring { r_min, r_max } => {
+            Obstacle::Ring {
+                r_min,
+                r_max,
+                temperature: _,
+            } => {
                 // Find intersection between path and ring: p_intersect = a * ray_pos2 + (1-a) * ray_pos1
                 let a = (PI / 2. - (ray_pos_t[2] % PI).abs())
                     / ((ray_pos_t_plus_dt[2] % PI).abs() - (ray_pos_t[2] % PI).abs()); // We search for an intersection in the equator plane defined by (theta=PI/2)
@@ -202,6 +208,7 @@ impl Obstacle {
                 r_min,
                 r_max,
                 thickness,
+                temperature: _,
             } => {
                 let altitude_1 = (ray_pos_t[2] - PI / 2.).sin() * ray_pos_t[1];
                 let altitude_2 = (ray_pos_t_plus_dt[2] - PI / 2.).sin() * ray_pos_t_plus_dt[1];
@@ -262,12 +269,17 @@ impl Obstacle {
             Obstacle::BlackHole { r: _ } => Rgb::<f64>([0., 0., 0.]),
             Obstacle::BlackHolePredict { r: _ } => Rgb::<f64>([0., 0., 0.]),
             Obstacle::MaxDistance { r: _ } => Rgb::<f64>([0., 0., 0.]),
-            Obstacle::Ring { r_min, r_max } => accretion_texture(r_min, r_max, ray_pos, 8000.),
+            Obstacle::Ring {
+                r_min,
+                r_max,
+                temperature,
+            } => accretion_texture(r_min, r_max, ray_pos, *temperature),
             Obstacle::AccretionDisk {
                 r_min,
                 r_max,
                 thickness: _,
-            } => accretion_texture(r_min, r_max, ray_pos, 8000.),
+                temperature,
+            } => accretion_texture(r_min, r_max, ray_pos, *temperature),
         }
     }
 }
