@@ -108,9 +108,12 @@ pub fn accretion_texture(
             / 2.)
             .powi(2))
     .sqrt();
-    let blackbodylum = ((1. - (r_min / ray_pos[1]).sqrt()) * (r_min / ray_pos[1]).powi(3))
+    let mut blackbodylum = ((1. - (r_min / ray_pos[1]).sqrt()) * (r_min / ray_pos[1]).powi(3))
         / (0.488_f64).powi(4)
         * (random_value.abs() + 0.5);
+    if ray_pos[1] <= *r_min {
+        blackbodylum = 0.;
+    }
     let temp = blackbodylum.powf(0.25) * max_temperature / 1000.;
     let interp = temp - temp.floor();
     Rgb::<f64>([
