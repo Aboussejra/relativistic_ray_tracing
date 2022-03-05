@@ -175,7 +175,7 @@ mod unit_tests {
             r_min: 3. * black_hole_radius,
             r_max: 20. * black_hole_radius,
             thickness: 1.,
-            temperature: 3000.,
+            temperature: 2500.,
         };
         let max_radius = Obstacle::MaxDistance {
             r: camera_distance * 1.1,
@@ -189,13 +189,13 @@ mod unit_tests {
 
         let mut cam_position = Array1::<f64>::zeros(3);
         cam_position[0] = camera_distance;
-        cam_position[1] = PI * 0.485;
+        cam_position[1] = PI * 0.455;
         let mut cam_orientation = Array1::<f64>::zeros(3);
         cam_orientation[0] = 0.;
         cam_orientation[1] = 0.;
 
         let camera = Camera {
-            fov: [PI / 3., PI / 6.],
+            fov: [PI / 2.5, PI / 5.],
             im_size: [200, 100],
             orientation: cam_orientation,
             position: cam_position,
