@@ -13,3 +13,4 @@ ang = "0.5.0"
 rayon = "1.0"
 noise = "0.7.0"
 rand = "0.8.5"
+clap = { version = "3.1.2", features = ["cargo"] }
