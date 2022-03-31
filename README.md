@@ -24,3 +24,4 @@ project's root directory after having installed `rustup`.
     rustc --version
 
 
+Project was developed using Gitlab : https://gitlab.com/Aboussejra/relativistic-ray-tracing/-/tree/master
