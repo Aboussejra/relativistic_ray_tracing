@@ -15,6 +15,12 @@ To see what the result may look like with a black hole and an accretion disk, tr
 
 Look at what is in `./doc` to see files explaining the physics behind the project.
 
+
+Example in 1000*1000 may be seen here:
+
+ ![alt text](render.png)*
+
+
 # Install Rust >= 1.58.0
 
 Install the rust toolchain with [rustup](https://rustup.rs/).
@@ -22,6 +28,5 @@ To install the appropriate rust version, just run the command below in the
 project's root directory after having installed `rustup`.
 
     rustc --version
-
 
 Project was developed using Gitlab : https://gitlab.com/Aboussejra/relativistic-ray-tracing/-/tree/master
